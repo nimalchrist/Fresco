@@ -1,63 +1,38 @@
-// ignore_for_file: unnecessary_null_comparison
-
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
-import '../http_operations/http_services.dart';
-import '../http_operations/post_list_model.dart';
+import './List_the_posts.dart';
+import './Search_button.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class Home_page extends StatefulWidget {
+  const Home_page({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Home_page> createState() => _Home_pageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  final Httpservice httpService = Httpservice();
-
+class _Home_pageState extends State<Home_page> {
   @override
   Widget build(BuildContext context) {
-    Uint8List _bytesImage;
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 5,
-        shadowColor: Colors.black26,
-      ),
-      body: FutureBuilder(
-        future: httpService.getPosts(),
-        builder: (BuildContext context,
-            AsyncSnapshot<List<PostListModel>> snapshot) {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              itemCount: snapshot.data?.length,
-              itemBuilder: (context, i) {
-                String? rawString = snapshot.data![i].postContent;
-                if (rawString!.length % 4 > 0) {
-                  rawString += '_' * (4 - rawString.length % 4);
-                }
-                _bytesImage = Base64Decoder().convert(rawString);
-                return Container(
-                  width: double.infinity,
-                  color: Color.fromARGB(255, 185, 184, 185),
-                  margin: const EdgeInsets.all(20),
-                  child: Column(
-                    children: [
-                      Text("${snapshot.data![i].postTittle}"),
-                      Image.memory(_bytesImage),
-                    ],
-                  ),
-                );
-              },
-            );
-          } else {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
-          }
-        },
+      body: Stack(
+        children: <Widget>[
+          Scaffold(
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            appBar: AppBar(
+              title: const Text(
+                "Fresco",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 49, 35, 131),
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              actions: const [
+                Search_here(),
+              ],
+            ),
+            body: const List_the_posts(),
+          ),
+        ],
       ),
     );
   }

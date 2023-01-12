@@ -2,14 +2,28 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
+const fileUpload = require('express-fileupload');
 
 
-
+//middle wares
 app.use(bodyParser.json());
+
 app.use(bodyParser.urlencoded({
-extended: true
+    extended: true
 }));
 
+app.use(express.static('public'));
+
+app.use('/post_contents', express.static(__dirname + '/post_contents'));
+
+app.use(
+    fileUpload({
+        limits: {
+            fileSize: 10000000,
+        },
+        abortOnLimit: true,
+    }),
+);
 
 // default route
 app.get('/', function (req, res) {
@@ -19,10 +33,10 @@ return res.send({ error: true, message: 'hello' })
 
 // connection configurations
 var dbConn = mysql.createConnection({
-host: 'localhost',
-user: 'root',
-password: 'Ninunimal@2',
-database: 'fresco_db'
+    host: 'localhost',
+    user: 'root',
+    password: 'Ninunimal@2',
+    database: 'fresco_db'
 });
 
 
@@ -45,7 +59,7 @@ app.get('/users', function (req, res) {
 app.get('/posts', function(req, res){
     dbConn.query('select * from posts', function(error, results, fields){
         if(error)
-            throw error;
+            res.json({body: "Error with fetching...try again later..."});
         return res.json(results);
     });
 });

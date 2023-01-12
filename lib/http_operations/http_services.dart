@@ -4,7 +4,7 @@ import './post_list_model.dart';
 
 class Httpservice {
   Future<List<PostListModel>> getPosts() async {
-    var url = Uri.parse('http://192.168.223.221:8000/posts');
+    var url = Uri.parse('http://192.168.47.221:8000/posts');
     http.Response res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -20,6 +20,4 @@ class Httpservice {
       throw "Unable to retrieve posts.";
     }
   }
-
-  //other http funcitons
 }

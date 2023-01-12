@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'app_pages/Home_page.dart';
+import 'app_pages/App_layout_controller.dart';
 
 void main() {
   runApp(const MyApp());
@@ -14,9 +14,12 @@ class MyApp extends StatelessWidget {
       title: 'Fresco app',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: Colors.white,
+        primaryColor: const Color.fromARGB(255, 31, 21, 87),
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
+        hoverColor: Colors.transparent,
       ),
-      home: const HomePage(),
+      home: const AppLayout(),
     );
   }
 }
