@@ -1,13 +1,145 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import './Other_profile_page.dart';
+import '../http_operations/http_services.dart';
+import '../http_operations/post_list_model.dart';
 
-class List_the_posts extends StatelessWidget {
-  final dummyAvatar =
-      'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.scoutandhire.io%2Fcollections%2Fqa-test-engineer&psig=AOvVaw3h4MPJTmZeYID38t1NnJ_x&ust=1673424753948000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMCPhpLHvPwCFQAAAAAdAAAAABAJ';
-  final dummyImage =
-      'https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.scoutandhire.io%2Fcollections%2Fqa-test-engineer&psig=AOvVaw3h4MPJTmZeYID38t1NnJ_x&ust=1673424753948000&source=images&cd=vfe&ved=0CBAQjRxqFwoTCMCPhpLHvPwCFQAAAAAdAAAAABAJ';
+class List_the_posts extends StatefulWidget {
   const List_the_posts({super.key});
+
+  @override
+  State<List_the_posts> createState() => _List_the_postsState();
+}
+
+class _List_the_postsState extends State<List_the_posts> {
+  Httpservice http_service = Httpservice();
+
+  Widget Post_list_view(BuildContext context) {
+    return FutureBuilder(
+      future: http_service.getPosts(),
+      builder:
+          (BuildContext context, AsyncSnapshot<List<PostListModel>> snapshot) {
+        if (snapshot.hasData) {
+          return snapshot.data!.length != null
+              ? ListView.builder(
+                  itemCount: snapshot.data!.length,
+                  itemBuilder: (context, i) {
+                    return Post_container(context, snapshot.data![i]);
+                  },
+                )
+              : const Text(
+                  "Yarume post upload panala na ena pana",
+                );
+        } else if (snapshot.hasError) {
+          return const Center(
+            child: Text(
+              "Ipothaiku error irukuthu pola ",
+            ),
+          );
+        }
+        return const Center(
+          child: CircularProgressIndicator(
+            color: Color.fromARGB(255, 31, 21, 87),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget Post_container(BuildContext context, PostListModel content) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Author_info(
+            context, content.profilePic, content.userName, content.postTitle),
+        Post_content(content.postContent),
+        Post_summary(content.postSummary),
+        const SizedBox(
+          height: 25,
+        )
+      ],
+    );
+  }
+
+  Widget Author_info(BuildContext context, String profile_pic, String user_name,
+      String post_title) {
+    const double avatarDiameter = 44;
+    var _Avatar = 'http://192.168.47.221:8000/profile_pics/$profile_pic';
+    return Row(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8),
+          child: GestureDetector(
+            onTap: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => Other_profile_page(),
+                ),
+              );
+            },
+            child: Container(
+              width: avatarDiameter,
+              height: avatarDiameter,
+              decoration: const BoxDecoration(
+                color: Colors.amber,
+                shape: BoxShape.circle,
+              ),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(avatarDiameter / 2),
+                child: CachedNetworkImage(
+                  imageUrl: _Avatar,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ),
+        ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              post_title,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+            Text(
+              '${user_name}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black38,
+              ),
+            ),
+          ],
+        )
+      ],
+    );
+  }
+
+  Widget Post_summary(String post_summary) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      child: Text(
+        post_summary,
+      ),
+    );
+  }
+
+  Widget Post_content(String post_content) {
+    String _Image = 'http://192.168.47.221:8000/post_contents/$post_content';
+    return AspectRatio(
+      aspectRatio: 1,
+      child: CachedNetworkImage(
+        fit: BoxFit.cover,
+        imageUrl: _Image,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,91 +147,4 @@ class List_the_posts extends StatelessWidget {
       body: Post_list_view(context),
     );
   }
-}
-
-Widget Author_info(BuildContext context) {
-  const double avatarDiameter = 44;
-  const dummyAvatar =
-      'https://static.wikia.nocookie.net/inuyasha/images/b/b5/Inuyasha.png/revision/latest?cb=20151128185518';
-  return Row(
-    children: [
-      Padding(
-        padding: const EdgeInsets.all(8),
-        child: GestureDetector(
-          onTap: () {
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => Other_profile_page(),
-              ),
-            );
-          },
-          child: Container(
-            width: avatarDiameter,
-            height: avatarDiameter,
-            decoration: const BoxDecoration(
-              color: Colors.amber,
-              shape: BoxShape.circle,
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(avatarDiameter / 2),
-              child: CachedNetworkImage(
-                imageUrl: dummyAvatar,
-                fit: BoxFit.cover,
-              ),
-            ),
-          ),
-        ),
-      ),
-      const Text(
-        'Username',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-        ),
-      )
-    ],
-  );
-}
-
-Widget Post_content() {
-  const dummyImage =
-      'https://i1.wp.com/butwhythopodcast.com/wp-content/uploads/2020/09/maxresdefault-28.jpg?fit=1280%2C720&ssl=1';
-  return AspectRatio(
-    aspectRatio: 1,
-    child: CachedNetworkImage(
-      fit: BoxFit.cover,
-      imageUrl: dummyImage,
-    ),
-  );
-}
-
-Widget Post_summary() {
-  return const Padding(
-    padding: EdgeInsets.symmetric(
-      horizontal: 8,
-      vertical: 4,
-    ),
-    child: Text(
-        'Welcome to the Kilo Loco YouTube channel, where we cover iOS, Flutter, and Android development. The perfect place for explarative mobile devlopers.'),
-  );
-}
-
-Widget Post_container(BuildContext context) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Author_info(context),
-      Post_content(),
-      Post_summary(),
-    ],
-  );
-}
-
-Widget Post_list_view(BuildContext context) {
-  return ListView.builder(
-    itemCount: 10,
-    itemBuilder: ((context, index) {
-      return Post_container(context);
-    }),
-  );
 }

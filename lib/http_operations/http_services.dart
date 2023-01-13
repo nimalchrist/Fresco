@@ -17,7 +17,7 @@ class Httpservice {
       print(posts);
       return posts;
     } else {
-      throw "Unable to retrieve posts.";
+      return [];
     }
   }
 }

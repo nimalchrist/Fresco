@@ -25,6 +25,10 @@ app.use(
     }),
 );
 
+app.use(express.static('public'));
+app.use('/post_contents', express.static(__dirname + '/post_contents'));
+app.use('/profile_pics', express.static(__dirname + '/profile_pics'));
+
 // default route
 app.get('/', function (req, res) {
 return res.send({ error: true, message: 'hello' })
@@ -45,6 +49,7 @@ var dbConn = mysql.createConnection({
 dbConn.connect(); 
 
 
+
 // Retrieve all users 
 app.get('/users', function (req, res) {
     dbConn.query('SELECT * FROM users', function (error, results, fields) {
@@ -57,7 +62,7 @@ app.get('/users', function (req, res) {
 
 // Retrieve all posts
 app.get('/posts', function(req, res){
-    dbConn.query('select * from posts', function(error, results, fields){
+    dbConn.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id;', function(error, results, fields){
         if(error)
             res.json({body: "Error with fetching...try again later..."});
         return res.json(results);

@@ -83,12 +83,7 @@ class _AppLayoutState extends State<AppLayout> {
         height: 50,
         child: FittedBox(
           child: FloatingActionButton(
-            backgroundColor: const Color.fromARGB(
-              255,
-              31,
-              21,
-              87,
-            ),
+            backgroundColor: const Color.fromARGB(255, 31, 21, 87),
             onPressed: () {
               showModalBottomSheet(
                 context: context,

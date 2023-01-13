@@ -6,25 +6,31 @@ class PostListModel {
   PostListModel({
     required this.postId,
     required this.userId,
-    required this.postTittle,
+    required this.userName,
+    required this.profilePic,
+    required this.postTitle,
     required this.postContent,
-    required this.timePosted,
     required this.postSummary,
+    required this.timePosted,
   });
 
   final int? postId;
   final int? userId;
-  final String? postTittle;
-  final String? postContent;
+  final String userName;
+  final dynamic profilePic;
+  final String postTitle;
+  final String postContent;
+  final String postSummary;
   final DateTime? timePosted;
-  final dynamic postSummary;
 
   factory PostListModel.fromJson(Map<String, dynamic> json) => PostListModel(
         postId: json["post_id"],
         userId: json["user_id"],
-        postTittle: json["post_tittle"],
+        userName: json["user_name"],
+        profilePic: json["profile_pic"],
+        postTitle: json["post_title"],
         postContent: json["post_content"],
-        timePosted: DateTime.parse(json["time_posted"]),
         postSummary: json["post_summary"],
+        timePosted: DateTime.parse(json["time_posted"]),
       );
 }
