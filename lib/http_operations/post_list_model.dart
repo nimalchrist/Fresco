@@ -15,7 +15,7 @@ class PostListModel {
   });
 
   final int? postId;
-  final int? userId;
+  final int userId;
   final String userName;
   final dynamic profilePic;
   final String postTitle;

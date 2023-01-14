@@ -69,6 +69,18 @@ app.get('/posts', function(req, res){
     });
 });
 
+//Retrieve post with the id
+app.get('/users/:id', function(req, res){
+    let user_id = req.params.id;
+    if(!user_id){
+        return res.status(400).json("Error no user found");
+    }
+    dbConn.query('Select profile_pic, user_name, email, profile_text, registered_at from users where user_id = ?', user_id, function(error, result){
+        if(error) return res.status(500).send("Server error");
+        return res.status(200).json(result);
+    });
+});
+
 
 // // Retrieve user with id 
 // app.get('/user/:id', function (req, res) {
