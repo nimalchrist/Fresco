@@ -3,8 +3,6 @@ import './List_the_posts.dart';
 import './Search_button.dart';
 
 class Home_page extends StatefulWidget {
-  const Home_page({super.key});
-
   @override
   State<Home_page> createState() => _Home_pageState();
 }

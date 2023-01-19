@@ -109,7 +109,7 @@ class _List_the_postsState extends State<List_the_posts> {
               ),
             ),
             Text(
-              '${user_name}',
+              user_name,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 12,

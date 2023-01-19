@@ -68,7 +68,7 @@ class _AppLayoutState extends State<AppLayout> {
                 currentIndex = newIndex;
               });
             },
-            children: const [
+            children: [
               Home_page(),
               Notification_received(),
               Notification_received(),

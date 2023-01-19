@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import './App_layout_controller.dart';
 import '../http_operations/http_services.dart';
 import '../http_operations/other_user_model.dart';
 
@@ -32,7 +30,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.47.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.3.221:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
@@ -48,9 +46,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
           }
 
           return const Center(
-            child: CircularProgressIndicator(
-              backgroundColor: Color.fromARGB(255, 31, 21, 87),
-            ),
+            child: CircularProgressIndicator(),
           );
         }),
       ),
@@ -63,7 +59,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
       Column(
         children: [
           Text(
-            user.userName!,
+            '@${user.userName!}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           ),
           const SizedBox(height: 4),
@@ -98,8 +94,12 @@ class _Other_profile_pageState extends State<Other_profile_page> {
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             Text(
-              '${TimeFormatter(user.registeredAt!)}',
-              style: const TextStyle(fontSize: 16, height: 3.4),
+              TimeFormatter(user.registeredAt!),
+              style: const TextStyle(
+                fontSize: 16,
+                height: 3.4,
+                fontWeight: FontWeight.bold,
+              ),
             )
           ],
         ),
@@ -137,8 +137,6 @@ class ProfileWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final color = Theme.of(context).colorScheme.primary;
-
     return Center(
       child: Stack(
         children: [
@@ -151,7 +149,7 @@ class ProfileWidget extends StatelessWidget {
   Widget buildImage() {
     var dummyAvatar =
         'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_960_720.png';
-    var image = NetworkImage(imagePath != null ? imagePath : dummyAvatar);
+    var image = NetworkImage(imagePath);
 
     return ClipOval(
       child: Material(

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fresco/app_pages/LoginPage.dart';
+import 'package:fresco/app_pages/RegisterPage.dart';
 import 'app_pages/App_layout_controller.dart';
 
 void main() {
@@ -19,7 +21,7 @@ class MyApp extends StatelessWidget {
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
       ),
-      home: const AppLayout(),
+      home: const LoginPage(),
     );
   }
 }

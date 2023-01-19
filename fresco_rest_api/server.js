@@ -1,20 +1,19 @@
+//used modules
 var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql');
 const fileUpload = require('express-fileupload');
+const jwt = require('jsonwebtoken');
+require("dotenv").config();
 
 
 //middle wares
 app.use(bodyParser.json());
-
+app.use(express.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-
-app.use(express.static('public'));
-
-app.use('/post_contents', express.static(__dirname + '/post_contents'));
 
 app.use(
     fileUpload({
@@ -29,11 +28,6 @@ app.use(express.static('public'));
 app.use('/post_contents', express.static(__dirname + '/post_contents'));
 app.use('/profile_pics', express.static(__dirname + '/profile_pics'));
 
-// default route
-app.get('/', function (req, res) {
-return res.send({ error: true, message: 'hello' })
-});
-
 
 // connection configurations
 var dbConn = mysql.createConnection({
@@ -43,12 +37,16 @@ var dbConn = mysql.createConnection({
     database: 'fresco_db'
 });
 
-
-
 // connect to database
 dbConn.connect(); 
 
 
+//routes of the app
+
+// default route
+app.get('/', function (req, res) {
+    return res.send({ error: true, message: 'hello' })
+    });
 
 // Retrieve all users 
 app.get('/users', function (req, res) {
@@ -59,7 +57,6 @@ app.get('/users', function (req, res) {
     });
 });
 
-
 // Retrieve all posts
 app.get('/posts', function(req, res){
     dbConn.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id;', function(error, results, fields){
@@ -69,7 +66,7 @@ app.get('/posts', function(req, res){
     });
 });
 
-//Retrieve post with the id
+//Retrieve other users with the id
 app.get('/users/:id', function(req, res){
     let user_id = req.params.id;
     if(!user_id){
@@ -81,6 +78,46 @@ app.get('/users/:id', function(req, res){
     });
 });
 
+//Create user API
+app.post('/register', function(req, res){
+    let values = [req.body.username, req.body.email, req.body.password];
+    let email = req.body.email;
+    console.log(email);
+    dbConn.query("select email from users where email = ?",[email], function(error, result){
+        if (error) {
+            throw error
+        }
+        if (result.length != 0) {
+            res.status(409).json({message: "Email already exist"});
+        }else{
+            dbConn.query("Insert into users(user_name, email, password) values(?)",[values], function(error, result){
+                if (error) throw (error);
+                res.status(200).json({message: "registered successfully"});
+            });
+        }
+    });
+});
+
+//login authentication
+app.post('/login', (req, res)=>{
+    const {email, password} = req.body;
+    dbConn.query("Select email,password from users where email = ?", [email], function(error, results){
+        if(error){
+            throw error;
+        }
+        if(results.length == 0){
+            res.status(404).json({message: "Invalid Login Credentials"});
+        }
+        else{
+            let check_pass = results[0].password;
+            if(password == check_pass){
+                res.status(200).send({message: "Login successful"});
+            }else{
+                res.status(400).send({message: "sorry wrong password"});
+            }
+        }
+    });
+});
 
 // // Retrieve user with id 
 // app.get('/user/:id', function (req, res) {
