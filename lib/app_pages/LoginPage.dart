@@ -146,12 +146,15 @@ class _LoginPageState extends State<LoginPage> {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
                                   // If the form is valid, display a snackbar. In the real world,
                                   // you'd often call a server or save the information in a database.
-                                  httpService.loginUser(_emailController.text,
-                                      _passwordController.text, context);
+                                  await httpService.loginUser(
+                                    _emailController.text,
+                                    _passwordController.text,
+                                    context,
+                                  );
                                 }
                               },
                               child: const Text('Login'),
@@ -180,7 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                                               .pushAndRemoveUntil(
                                             MaterialPageRoute(
                                               builder: (BuildContext context) =>
-                                                  RegisterPage(),
+                                                  const RegisterPage(),
                                             ),
                                             (Route<dynamic> route) => false,
                                           ),

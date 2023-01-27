@@ -82,7 +82,6 @@ app.get('/users/:id', function(req, res){
 app.post('/register', function(req, res){
     let values = [req.body.username, req.body.email, req.body.password];
     let email = req.body.email;
-    console.log(email);
     dbConn.query("select email from users where email = ?",[email], function(error, result){
         if (error) {
             throw error
@@ -92,7 +91,12 @@ app.post('/register', function(req, res){
         }else{
             dbConn.query("Insert into users(user_name, email, password) values(?)",[values], function(error, result){
                 if (error) throw (error);
-                res.status(200).json({message: "registered successfully"});
+                dbConn.query("Select user_id from users where email = ?",[email],function(error, result){
+                    if (error) {
+                        throw error;
+                    }
+                    res.status(200).json({message: "registered successfully",user_id: result[0].user_id});
+                })
             });
         }
     });
@@ -111,7 +115,12 @@ app.post('/login', (req, res)=>{
         else{
             let check_pass = results[0].password;
             if(password == check_pass){
-                res.status(200).send({message: "Login successful"});
+                dbConn.query("Select user_id from users where email = ?",[email],function(error, result){
+                    if (error) {
+                        throw error;
+                    }
+                    res.status(200).json({message: "Login successful",user_id: result[0].user_id});
+                })
             }else{
                 res.status(400).send({message: "sorry wrong password"});
             }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fresco/app_pages/LoginPage.dart';
+import 'package:fresco/app_pages/Otp_page.dart';
 import 'package:fresco/app_pages/RegisterPage.dart';
 import 'app_pages/App_layout_controller.dart';
 

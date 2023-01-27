@@ -195,11 +195,11 @@ class _RegisterPageState extends State<RegisterPage> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            onPressed: () {
+                            onPressed: () async {
                               if (_formKey.currentState!.validate()) {
                                 // If the form is valid, display a snackbar. In the real world,
                                 // you'd often call a server or save the information in a database.
-                                httpservice.registerUser(
+                                await httpservice.registerUser(
                                   _nameController.text,
                                   _emailController.text,
                                   _passwordController.text,

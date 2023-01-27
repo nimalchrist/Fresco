@@ -30,7 +30,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.3.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
@@ -58,9 +58,11 @@ class _Other_profile_pageState extends State<Other_profile_page> {
   ) =>
       Column(
         children: [
-          Text(
-            '@${user.userName!}',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          GestureDetector(
+            child: Text(
+              '@${user.userName!}',
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -112,15 +114,6 @@ AppBar buildAppBar(BuildContext context) {
   return AppBar(
     backgroundColor: Colors.transparent,
     elevation: 0,
-    actions: [
-      // IconButton(
-      //   icon: const Icon(
-      //     icon,
-      //     color: Color.fromARGB(255, 31, 21, 87),
-      //   ),
-      //   onPressed: () {},
-      // ),
-    ],
   );
 }
 
@@ -147,8 +140,6 @@ class ProfileWidget extends StatelessWidget {
   }
 
   Widget buildImage() {
-    var dummyAvatar =
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_960_720.png';
     var image = NetworkImage(imagePath);
 
     return ClipOval(

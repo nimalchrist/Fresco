@@ -50,8 +50,13 @@ class _List_the_postsState extends State<List_the_posts> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Author_info(context, content.userId, content.profilePic,
-            content.userName, content.postTitle),
+        Author_info(
+          context,
+          content.userId,
+          content.profilePic,
+          content.userName,
+          content.postTitle,
+        ),
         Post_content(content.postContent),
         Post_summary(content.postSummary),
         const SizedBox(
@@ -64,9 +69,7 @@ class _List_the_postsState extends State<List_the_posts> {
   Widget Author_info(BuildContext context, int user_id, String profile_pic,
       String user_name, String post_title) {
     const double avatarDiameter = 44;
-    var _Avatar = 'http://192.168.47.221:8000/profile_pics/$profile_pic';
-    var dummyAvatar =
-        'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973461_960_720.png';
+    var _Avatar = 'http://192.168.112.221:8000/profile_pics/$profile_pic';
     return Row(
       children: [
         Padding(
@@ -91,7 +94,7 @@ class _List_the_postsState extends State<List_the_posts> {
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(avatarDiameter / 2),
                 child: CachedNetworkImage(
-                  imageUrl: _Avatar != null ? _Avatar : dummyAvatar,
+                  imageUrl: _Avatar,
                   fit: BoxFit.cover,
                 ),
               ),

@@ -5,13 +5,17 @@ import './Our_profile_page.dart';
 
 // ignore: camel_case_types
 class AppLayout extends StatefulWidget {
-  const AppLayout({super.key});
+  late int authorisedUser;
+  AppLayout({super.key, required int authorisedUser});
 
   @override
-  State<AppLayout> createState() => _AppLayoutState();
+  State<AppLayout> createState() =>
+      _AppLayoutState(authorisedUser: authorisedUser);
 }
 
 class _AppLayoutState extends State<AppLayout> {
+  late int authorisedUser;
+  _AppLayoutState({required this.authorisedUser});
   int currentIndex = 0;
   PageController pageController = PageController(initialPage: 0);
   final bottomNavigationBarItems = [

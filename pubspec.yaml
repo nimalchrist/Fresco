@@ -29,6 +29,7 @@ dev_dependencies:
   flutter_lints: ^2.0.0
   image_picker: ^0.8.6
   flutter_login: ^4.1.1
+  flutter_otp_text_field: ^1.1.1
 
 
 flutter:
