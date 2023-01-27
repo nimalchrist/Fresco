@@ -5,7 +5,7 @@ import './Our_profile_page.dart';
 
 // ignore: camel_case_types
 class AppLayout extends StatefulWidget {
-  late int authorisedUser;
+  int? authorisedUser;
   AppLayout({super.key, required int authorisedUser});
 
   @override
@@ -14,7 +14,7 @@ class AppLayout extends StatefulWidget {
 }
 
 class _AppLayoutState extends State<AppLayout> {
-  late int authorisedUser;
+  int? authorisedUser;
   _AppLayoutState({required this.authorisedUser});
   int currentIndex = 0;
   PageController pageController = PageController(initialPage: 0);

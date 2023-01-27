@@ -3,8 +3,8 @@ import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import '../http_operations/http_services.dart';
 
 class OtpScreen extends StatefulWidget {
-  int? authorisedUser;
-  OtpScreen({super.key, required int authorisedUser});
+  final int authorisedUser;
+  OtpScreen({Key? key, required this.authorisedUser}) : super(key: key);
 
   @override
   State<OtpScreen> createState() =>
@@ -12,11 +12,12 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  int? authorisedUser;
-  late int otpCode;
+  final int authorisedUser;
+  late String otpCode;
   Httpservice httpService = Httpservice();
 
   _OtpScreenState({required this.authorisedUser});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -58,7 +59,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     const Color.fromARGB(255, 31, 21, 87).withOpacity(0.1),
                 filled: true,
                 onSubmit: (String verificationCode) {
-                  otpCode = int.parse(verificationCode);
+                  otpCode = verificationCode;
                 },
               ),
               const SizedBox(
@@ -73,14 +74,14 @@ class _OtpScreenState extends State<OtpScreen> {
                 height: 50,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    primary: const Color.fromARGB(255, 31, 21, 87),
+                    backgroundColor: const Color.fromARGB(255, 31, 21, 87),
                     textStyle: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   onPressed: () async {
-                    await httpService.otpLoginVerification(
+                    await httpService.otpVerification(
                       otpCode,
                       authorisedUser,
                       context,

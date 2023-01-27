@@ -1,41 +1,31 @@
 //used modules
 var express = require('express');
+var app = express();
 var bodyParser = require('body-parser');
-var mysql2 = require('mysql2');
-var mysql2 = require('mysql2/promise');
+var mysql = require('mysql2');
 const fileUpload = require('express-fileupload');
+require("dotenv").config();
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator')
 
-
-var app = express();
-//
-let dbConn;
-async function connectToDb() {
-    try {
-        dbConn = await mysql2.createConnection({
-            host: 'localhost',
-            user: 'root',
-            password: 'Ninunimal@2',
-            database: 'fresco_db'
-        });
-        await dbConn.connect();
-        console.log("Successfully connected to the database.");
-
-    } catch (err) {
-        console.log(`Error connecting to the database: ${err.message}`);
-    }
-}
-
-
-//otp generator
-let generatedOtp = otpGenerator.generate(4, {
-    algorithm: 'SHA1',
-    digits: true,
-    lowerCaseAlphabets: false,
-    upperCaseAlphabets: false,
-    specialChars: false,
+// db connection configurations
+var dbConn = mysql.createConnection({
+    host: 'localhost',
+    user: 'root',
+    password: 'Ninunimal@2',
+    database: 'fresco_db'
 });
+
+var dbConn = mysql.createPool({
+    host: 'localhost',
+    user: 'root',
+    password: 'Ninunimal@2',
+    database: 'fresco_db',
+    connectionLimit: 10,  
+});
+
+
+
 
 
 //mail transporter
@@ -46,7 +36,6 @@ let transporter = nodemailer.createTransport({
         pass: 'hgtdeekqowaqlkuv'
     }
 });
-
 
 //middle wares
 app.use(bodyParser.json());
@@ -78,163 +67,224 @@ app.get('/', function (req, res) {
     return res.send({ error: true, message: 'hello' })
     });
 
-app.get('/users', async (req, res) => {
-    try {
-        await connectToDb();
-        [result] = await dbConn.query('SELECT * FROM users');
-        res.status(200).json(result);
-        dbConn.end();
-        console.log("Disconnected");
-    } catch (error) {
-        res.status(400).json(error);
-    }
-});
-
-app.get('/posts', async (req, res) => {
-    try {
-        await connectToDb();
-        [results] = await dbConn.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id;');
-        res.status(200).json(results);
-    } catch (error) {
-        console.log(error);
-        res.status(400).json({body: "Error with fetching...try again later..."});
-    }
-});
-
-app.get('/users/:id', async (req, res) => {
-    try {
-        await connectToDb();
-        const user_id = req.params.id;
-        if (!user_id) {
-            return res.status(400).json("Error no user found");
+// Retrieve all users 
+app.get('/users', function (req, res) {
+    dbConn.getConnection(function(err, connection) {
+        if (err) {
+            return res.status(500).send("Error getting connection from the pool");
         }
-        [result] = await dbConn.query("Select profile_pic, user_name, email, profile_text, registered_at from users where user_id = ?", [user_id]);
-        return res.status(200).json(result);
-    } catch (error) {
-        return res.status(500).send("Server error");
-    }
+        connection.query('SELECT * FROM users', function (error, results) {
+            if (error) {
+                return res.status(500).send("Server error");
+            }
+            return res.json(results);
+            connection.release();
+        });
+    });
 });
 
-
-app.post('/register', async (req, res) => {
-    try {
-        await connectToDb();
-        const email = req.body.email;
-        const [result] = await dbConn.query("SELECT email FROM users WHERE email = ?", [email]);
-        if (result.length != 0) {
-            res.status(409).json({message: "Email already exist"});
+// Retrieve all posts
+app.get('/posts', function(req, res){
+    dbConn.getConnection(function(err, connection) {
+        if (err) {
+            res.status(400).json({body: "Error with fetching...try again later..."});
         } else {
-            const values = [req.body.username, email, req.body.password, generatedOtp];
-            await dbConn.query("INSERT INTO users(user_name, email, password, otp_generated) values(?)", [values]);
-            const [user] = await dbConn.query("SELECT user_id FROM users WHERE email = ?", [email]);
-            res.status(200).json({message: "registered successfully", user_id: user[0].user_id});
-            let mailOptions = {
-                from: 'selvanimal0@gmail.com',
-                to: req.body.email,
-                subject: 'OTP for verification',
-                html: `<html>
-                          <head>
-                              <style>
-                                  h1 {
-                                      color: #5E9CA0;
-                                      text-align: center;
-                                  }
-                                  p {
-                                      font-family: Arial, sans-serif;
-                                      font-size: 16px;
-                                      line-height: 1.5;
-                                      text-align: justify;
-                                      margin-bottom: 1em;
-                                  }
-                              </style>
-                          </head>
-                          <body>
-                              <h1>Title</h1>
-                              <p>We are excited to have you here.</p>
-                              <p>Thank you for visiting.</p>
-                              <h2>Your OTP is ${generatedOtp}</h2>
-                          </body>
-                      </html>`
-              };
-              await transporter.sendMail(mailOptions);
+            connection.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id;', function(error, results, fields){
+                if(error) {
+                    res.status(400).json({body: "Error with fetching...try again later..."});
+                } else {
+                    res.json(results);
+                }
+                connection.release();
+            });
         }
-    }
-    catch(Exception){
-        console.log(error);
-        res.status(500).send({message: 'Error while sending OTP'});
-    }
+    });
 });
 
-app.post('/otp', async (req, res) => {
-    try {
-        await connectToDb();
+//Retrieve other users with the id
+app.get('/users/:id', function(req, res) {
+    let user_id = req.params.id;
+    if (!user_id) {
+        return res.status(400).json("Error no user found");
+    }
+    dbConn.getConnection(function(err, connection) {
+        if (err) {
+            res.status(500).send("Error getting connection from the pool");
+        }
+        connection.query('Select profile_pic, user_name, email, profile_text, registered_at from users where user_id = ?', user_id, function(error, result) {
+            if (error) {
+                return res.status(500).send("Server error");
+            }
+            res.status(200).json(result);
+            connection.release();
+        });
+    });
+});
+
+
+//Create user API
+app.post('/register', function(req, res){
+    let values = [req.body.username, req.body.email, req.body.password, generatedOtp];
+    let email = req.body.email;
+    dbConn.getConnection(function(err, connection) {
+        if (err) {
+            throw err;
+        }
+        connection.query("select email from users where email = ?",[email], function(error, result){
+            if (error) {
+                throw error;
+            }
+            if (result.length != 0) {
+                res.status(409).json({message: "Email already exist"});
+                connection.release();
+            }else{
+                connection.query("Insert into users(user_name, email, password, otp_generated) values(?)",[values], function(error, result){
+                    if (error) throw (error);
+                    connection.query("Select user_id from users where email = ?",[email],function(error, result){
+                        if (error) {
+                            throw error;
+                        }
+                        res.status(200).json({message: "registered successfully",user_id: result[0].user_id});
+                        //otp generator
+                        let generatedOtp = otpGenerator.generate(4, {
+                            algorithm: 'SHA1',
+                            digits: true,
+                            lowerCaseAlphabets: false,
+                            upperCaseAlphabets: false,
+                            specialChars: false,
+                        });
+                        let mailOptions = {
+                            from: 'selvanimal0@gmail.com',
+                            to: req.body.email,
+                            subject: 'OTP for verification',
+                            html: `<html>
+                                        <head>
+                                            <style>
+                                                h1 {
+                                                    color: #5E9CA0;
+                                                    text-align: center;
+                                                }
+                                                p {
+                                                    font-family: Arial, sans-serif;
+                                                    font-size: 16px;
+                                                    line-height: 1.5;
+                                                    text-align: justify;
+                                                    margin-bottom: 1em;
+                                                }
+                                            </style>
+                                        </head>
+                                        <body>
+                                            <h1>Title</h1>
+                                            <p>We are excited to have you here.</p>
+                                            <p>Thank you for visiting.</p>
+                                            <h2>Your OTP is ${generatedOtp}</h2>
+                                        </body>
+                                    </html>`
+                        };
+                        transporter.sendMail(mailOptions, function(error){
+                            if (error) {
+                                console.log(error);
+                                res.status(500).send({message: 'Error while sending OTP'});
+                            }
+                        });
+                        connection.release();
+                    });
+                });
+            }
+        });
+    });
+});
+
+
+app.post('/otp', (req, res) => {
+    dbConn.getConnection(function(err, connection) {
+        if (err) throw (err);
         let entered_otp = req.body.otp;
         let authorised_user_id = req.body.id;
-        [result] = await dbConn.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id]);
-        if (entered_otp == result[0].otp_generated) {
-            res.status(200).json({user_id: result[0].user_id, message: "email verified successfully"});
-        }else{
-            res.status(200).json({message: "Invalid otp"});
-        }
-    } catch (error) {
-        res.status(400).json({error});
-    }
-})
-
-
-app.post('/login', async (req, res) => {
-    await connectToDb();
-    try {
-        const {email, password} = req.body;
-        const [results] = await dbConn.query("Select email,password from users where email = ?", [email]);
-        if(results.length == 0){
-            res.status(404).json({message: "Invalid Login Credentials"});
-        }
-        else{
-            let check_pass = results[0].password;
-            if(password == check_pass){
-                const [result] = await dbConn.query("Select user_id from users where email = ?",[email]);
-                res.status(200).json({message: "Login successful",user_id: result[0].user_id});
-                let mailOptions = {
-                    from: 'selvanimal0@gmail.com',
-                    to: req.body.email,
-                    subject: 'OTP for verification',
-                    html: `<html>
-                              <head>
-                                <style>
-                                    h1 {
-                                        color: white;
-                                        font-weight: bold;
-                                        text-align: center;
-                                    }
-                                    p {
-                                        font-family: Arial, sans-serif;
-                                        font-size: 14px;
-                                        line-height: 1.0;
-                                        text-align: justify;
-                                        margin-bottom: 1em;
-                                    }
-                                </style>
-                              </head>
-                              <body>
-                                <h1>Fresco</h1>
-                                <h2>Your OTP is ${generatedOtp}</h2>
-                                <p>We are excited to have you here.</p>
-                                <p>Thank you for visiting.</p>
-                              </body>
-                          </html>`
-                };
-                await transporter.sendMail(mailOptions);
-                await dbConn.query("update users set otp_generated = ? where email = ?",[generatedOtp, email]);
+        connection.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id], function(err, result){
+            if (err) throw (err);
+            if (entered_otp == result[0].otp_generated) {
+                res.status(200).json({user_id: result[0].user_id, message: "email verified successfully"});
             }
             else{
-                res.status(400).send({message: "sorry wrong password"});
+                res.status(400).json({message: "Invalid otp"});
             }
-        }
-    } catch (error) {
-        console.log(error);
-        res.status(500).send({message: 'Error while sending OTP'});
-    }
+            connection.release();
+        });
+    });
+});
+
+
+app.post('/login', (req, res)=>{
+    const {email, password} = req.body;
+    dbConn.getConnection(function(err, connection) {
+        connection.query("Select email,password from users where email = ?", [email], function(error, results){
+            if(error){
+                throw error;
+            }
+            if(results.length == 0){
+                res.status(404).json({message: "Invalid Login Credentials"});
+            }
+            else{
+                let check_pass = results[0].password;
+                if(password == check_pass){
+                    connection.query("Select user_id from users where email = ?",[email],function(error, result){
+                        if (error) {
+                        throw error;
+                        }
+                        res.status(200).json({message: "Login successful",user_id: result[0].user_id});
+                        //otp generator
+                        let generatedOtp = otpGenerator.generate(4, {
+                            algorithm: 'SHA1',
+                            digits: true,
+                            lowerCaseAlphabets: false,
+                            upperCaseAlphabets: false,
+                            specialChars: false,
+                        });
+                        let mailOptions = {
+                            from: 'selvanimal0@gmail.com',
+                            to: req.body.email,
+                            subject: 'OTP for verification',
+                            html: `<html>
+                                     <head>
+                                        <style> 
+                                            h1 { 
+                                                color: white; 
+                                                font-weight: bold; 
+                                                text-align: center; 
+                                            } 
+                                            p { 
+                                                font-family: Arial, sans-serif; 
+                                                font-size: 14px; 
+                                                line-height: 1.0; 
+                                                text-align: justify; 
+                                                margin-bottom: 1em; 
+                                            } 
+                                        </style> 
+                                      </head> 
+                                      <body> 
+                                        <h1>Fresco</h1> 
+                                        <h2>Your OTP is ${generatedOtp}</h2> 
+                                        <p>We are excited to have you here.</p> 
+                                        <p>Thank you for visiting.</p>
+                                      </body> 
+                                    </html>`
+                        };
+                        connection.query("update users set otp_generated = ? where email = ?",[generatedOtp, email]);
+                        transporter.sendMail(mailOptions, function(error){
+                            if (error) {
+                                console.log(error);
+                                res.status(500).send({message: 'Error while sending OTP'});
+                            }
+                        });
+                    });
+                }else{
+                    res.status(400).send({message: "sorry wrong password"});
+                }
+            }
+            connection.release();
+        });
+    });
 });
 
 // set port

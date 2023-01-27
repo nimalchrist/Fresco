@@ -16,10 +16,7 @@ var dbConn = mysql.createConnection({
     database: 'fresco_db'
 });
 
-// connect to database
-dbConn.connect(); 
-
-
+dbConn.connect();
 //otp generator
 let generatedOtp = otpGenerator.generate(4, {
     algorithm: 'SHA1',
@@ -159,18 +156,18 @@ app.post('/register', function(req, res){
 });
 
 
-app.post('/register/otp', (req, res) => {
+app.post('/otp', (req, res) => {
     let entered_otp = req.body.otp;
     let authorised_user_id = req.body.id;
     dbConn.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id], function(err, result){
         if (err) throw (err);
         if (entered_otp == result[0].otp_generated) {
-            res.status(200).json({user_id: result[0].user_id, message: "email verifies successfully"});
+            res.status(200).json({user_id: result[0].user_id, message: "email verified successfully"});
         }
         else{
             res.status(400).json({message: "Invalid otp"});
         }
-    })
+    });
 });
 
 
@@ -191,6 +188,7 @@ app.post('/login', (req, res)=>{
                     if (error) {
                         throw error;
                     }
+                    res.status(200).json({message: "Login successful",user_id: result[0].user_id});
                     let mailOptions = {
                         from: 'selvanimal0@gmail.com',
                         to: req.body.email,
@@ -220,34 +218,19 @@ app.post('/login', (req, res)=>{
                                   </body>
                               </html>`
                     };
+                    dbConn.query("update users set otp_generated = ? where email = ?",[generatedOtp, email]);
                     transporter.sendMail(mailOptions, function(error){
                         if (error) {
                           console.log(error);
                           res.status(500).send({message: 'Error while sending OTP'});
                         }
-                    });
-                    dbConn.query("update users set otp_generated = ? where email = ?",[generatedOtp, email]);
-                    res.status(200).json({message: "Login successful",user_id: result[0].user_id});
-                })
+                    });  
+                });
             }else{
                 res.status(400).send({message: "sorry wrong password"});
             }
         }
     });
-});
-
-app.post('/login/otp', (req, res) => {
-    let entered_otp = req.body.otp;
-    let authorised_user_id = req.body.id;
-    dbConn.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id], function(err, result){
-        if (err) throw (err);
-        if (entered_otp == result[0].otp_generated) {
-            res.status(200).json({user_id: result[0].user_id, message: "email verifies successfully"});
-        }
-        else{
-            res.status(400).json({message: "Invalid otp"});
-        }
-    })
 });
 
 // set port

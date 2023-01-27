@@ -21,7 +21,7 @@ class Httpservice {
 
     String registerMessage = loginResponseData["message"];
     if (res.statusCode == 200) {
-      int? authorisedUser = loginResponseData["user_id"];
+      int authorisedUser = loginResponseData["user_id"];
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(registerMessage),
@@ -29,8 +29,8 @@ class Httpservice {
       );
       Navigator.of(context).pushAndRemoveUntil(
         MaterialPageRoute(
-          builder: (BuildContext context) => AppLayout(
-            authorisedUser: authorisedUser!,
+          builder: (BuildContext context) => OtpScreen(
+            authorisedUser: authorisedUser,
           ),
         ),
         (Route<dynamic> route) => false,
@@ -132,37 +132,53 @@ class Httpservice {
   }
 
 // otp verification of register
-  Future otpLoginVerification(
-      int otp, int? userId, BuildContext context) async {
-    var url = Uri.parse('http://192.168.112.221:8000/otp');
+  Future<void> otpVerification(
+      String otp, int userId, BuildContext context) async {
+    try {
+      // Make the HTTP request to the server
+      var url = Uri.parse('http://192.168.112.221:8000/otp');
+      var map = Map<String, dynamic>();
+      map["otp"] = otp;
+      map["id"] = userId.toString();
+      var response = await http.post(url, body: map);
 
-    var map = Map<String, dynamic>();
-    map["otp"] = otp;
-    map["id"] = int.parse("userId");
-    http.Response res = await http.post(url, body: map);
-    var otpResponseData = jsonDecode(res.body);
-    int authorisedUser = otpResponseData['user_id'];
-    String otpMessage = otpResponseData['message'];
-    if (res.statusCode == 200) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(otpMessage),
-        ),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) => AppLayout(
-            authorisedUser: authorisedUser,
+      // Handle the response
+      if (response.statusCode == 200) {
+        var responseData = jsonDecode(response.body);
+        var authorisedUser = responseData['user_id'];
+        var message = responseData['message'];
+
+        // Show a success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
           ),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(otpMessage),
-        ),
-      );
+        );
+
+        // Navigate to the next screen
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(
+            builder: (BuildContext context) => AppLayout(
+              authorisedUser: authorisedUser,
+            ),
+          ),
+          (Route<dynamic> route) => false,
+        );
+      } else {
+        // Handle the error response
+        var responseData = jsonDecode(response.body);
+        var message = responseData['message'];
+
+        // Show an error message
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(message),
+          ),
+        );
+      }
+    } catch (e) {
+      // Handle any exceptions that may occur
+      print(e);
     }
   }
 
