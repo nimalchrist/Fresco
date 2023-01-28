@@ -1,15 +1,14 @@
 import 'dart:convert';
-import 'package:fresco/app_pages/Otp_page.dart';
+import 'package:fresco/http_operations/authorised_user_model.dart';
 import 'package:http/http.dart' as http;
 import './post_list_model.dart';
 import './other_user_model.dart';
-import 'package:flutter/material.dart';
-import '../app_pages/App_layout_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Httpservice {
   // register user
-  Future registerUser(String username, String email, String password,
-      BuildContext context) async {
+  Future<List<dynamic>> registerUser(
+      String username, String email, String password) async {
     var map = Map<String, dynamic>();
     map["username"] = username;
     map["email"] = email;
@@ -20,59 +19,21 @@ class Httpservice {
     var loginResponseData = jsonDecode(res.body);
 
     String registerMessage = loginResponseData["message"];
-    if (res.statusCode == 200) {
-      int authorisedUser = loginResponseData["user_id"];
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(registerMessage),
-        ),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) => OtpScreen(
-            authorisedUser: authorisedUser,
-          ),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("Registration Failed"),
-          content: Text(registerMessage),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: Container(
-                color: const Color.fromARGB(202, 32, 32, 99),
-                width: double.infinity,
-                padding: const EdgeInsets.only(
-                  left: 14,
-                  right: 14,
-                  top: 5,
-                  bottom: 5,
-                ),
-                child: const Text(
-                  "Okay",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+    try {
+      if (res.statusCode == 200) {
+        int authorisedUser = loginResponseData["user_id"];
+
+        return [registerMessage, authorisedUser];
+      } else {
+        return [registerMessage];
+      }
+    } catch (e) {
+      return [e];
     }
   }
 
   // login user
-  Future<void> loginUser(
-      String email, String password, BuildContext context) async {
+  Future<List<dynamic>> loginUser(String email, String password) async {
     var map = Map<String, dynamic>();
     map["email"] = email;
     map["password"] = password;
@@ -82,58 +43,20 @@ class Httpservice {
     var loginResponseData = jsonDecode(res.body);
 
     String loginMessage = loginResponseData["message"];
-
-    if (res.statusCode == 200) {
-      int authorisedUser = loginResponseData["user_id"];
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(loginMessage),
-        ),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(
-          builder: (BuildContext context) =>
-              OtpScreen(authorisedUser: authorisedUser),
-        ),
-        (Route<dynamic> route) => false,
-      );
-    } else {
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: const Text("Login Failed"),
-          content: Text(loginMessage),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.of(ctx).pop();
-              },
-              child: Container(
-                color: const Color.fromARGB(226, 32, 32, 99),
-                padding: const EdgeInsets.only(
-                  left: 14,
-                  right: 14,
-                  top: 5,
-                  bottom: 5,
-                ),
-                child: const Text(
-                  "Okay",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      );
+    try {
+      if (res.statusCode == 200) {
+        int authorisedUser = loginResponseData["user_id"];
+        return [loginMessage, authorisedUser];
+      } else {
+        return [loginMessage];
+      }
+    } catch (e) {
+      return [e];
     }
   }
 
 // otp verification of register
-  Future<void> otpVerification(
-      String otp, int userId, BuildContext context) async {
+  Future<List<dynamic>> otpVerification(String otp, int userId) async {
     try {
       // Make the HTTP request to the server
       var url = Uri.parse('http://192.168.112.221:8000/otp');
@@ -148,37 +71,21 @@ class Httpservice {
         var authorisedUser = responseData['user_id'];
         var message = responseData['message'];
 
-        // Show a success message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-          ),
-        );
+        // local storage of the user.
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        prefs.setInt('user_id', authorisedUser);
 
-        // Navigate to the next screen
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-            builder: (BuildContext context) => AppLayout(
-              authorisedUser: authorisedUser,
-            ),
-          ),
-          (Route<dynamic> route) => false,
-        );
+        return [message, authorisedUser];
       } else {
         // Handle the error response
         var responseData = jsonDecode(response.body);
         var message = responseData['message'];
 
-        // Show an error message
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(message),
-          ),
-        );
+        return [message];
       }
     } catch (e) {
       // Handle any exceptions that may occur
-      print(e);
+      return [e];
     }
   }
 
@@ -202,8 +109,8 @@ class Httpservice {
   }
 
 // get the other user
-  Future<OtherUserModel> getOtherUser(int user_id) async {
-    var url = Uri.parse('http://192.168.112.221:8000/users/$user_id');
+  Future<OtherUserModel> getOtherUser(int userId) async {
+    var url = Uri.parse('http://192.168.112.221:8000/users/$userId');
     http.Response res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -211,6 +118,20 @@ class Httpservice {
       OtherUserModel OtherUser = OtherUserModel.fromJson(body[0]);
 
       return OtherUser;
+    }
+    throw "Error while calling";
+  }
+
+  //get the authorised user
+  Future<AuthorisedUserModel> getAuthorisedUser(int userId) async {
+    var url = Uri.parse('http://192.168.112.221:8000/auth_user/$userId');
+    http.Response res = await http.get(url);
+
+    if (res.statusCode == 200) {
+      final body = json.decode(res.body);
+      AuthorisedUserModel AuthUser = AuthorisedUserModel.fromJson(body[0]);
+
+      return AuthUser;
     }
     throw "Error while calling";
   }

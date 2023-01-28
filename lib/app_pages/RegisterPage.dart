@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../http_operations/http_services.dart';
+import './Otp_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -199,12 +200,37 @@ class _RegisterPageState extends State<RegisterPage> {
                               if (_formKey.currentState!.validate()) {
                                 // If the form is valid, display a snackbar. In the real world,
                                 // you'd often call a server or save the information in a database.
-                                await httpservice.registerUser(
+                                List<dynamic> responses =
+                                    await httpservice.registerUser(
                                   _nameController.text,
                                   _emailController.text,
                                   _passwordController.text,
-                                  context,
                                 );
+                                if (responses.length == 2) {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      content: Text(responses[0]),
+                                    ),
+                                  );
+                                  Navigator.of(context).pushAndRemoveUntil(
+                                    MaterialPageRoute(
+                                      builder: (BuildContext context) =>
+                                          OtpScreen(
+                                        authorisedUser: responses[1],
+                                      ),
+                                    ),
+                                    (Route<dynamic> route) => false,
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                      duration: const Duration(
+                                        milliseconds: 500,
+                                      ),
+                                      content: Text(responses[0]),
+                                    ),
+                                  );
+                                }
                               }
                             },
                             child: const Text('Submit'),

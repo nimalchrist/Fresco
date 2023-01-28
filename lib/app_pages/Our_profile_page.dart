@@ -1,39 +1,73 @@
 import 'package:flutter/material.dart';
+import 'package:fresco/http_operations/authorised_user_model.dart';
+import 'package:fresco/http_operations/http_services.dart';
 
 class Our_profile_page extends StatefulWidget {
-  const Our_profile_page({Key? key}) : super(key: key);
+  final int authorisedUser;
+  Our_profile_page({Key? key, required this.authorisedUser}) : super(key: key);
 
   @override
-  _Our_profile_pageState createState() => _Our_profile_pageState();
+  _Our_profile_pageState createState() =>
+      _Our_profile_pageState(authorisedUser);
 }
 
 class _Our_profile_pageState extends State<Our_profile_page> {
+  final int authorisedUser;
+  _Our_profile_pageState(this.authorisedUser);
+  Httpservice httpService = Httpservice();
   @override
   Widget build(BuildContext context) {
-    const user = UserPreferences.myUser;
-
+    print(authorisedUser);
     return Scaffold(
       appBar: buildAppBar(context),
-      body: ListView(
-        physics: const BouncingScrollPhysics(),
-        children: [
-          ProfileWidget(
-            imagePath: user.imagePath,
-            onClicked: () async {},
-          ),
-          const SizedBox(height: 24),
-          buildName(user),
-          const SizedBox(height: 48),
-          buildAbout(user),
-        ],
+      body: FutureBuilder(
+        future: httpService.getAuthorisedUser(authorisedUser),
+        builder: ((BuildContext context,
+            AsyncSnapshot<AuthorisedUserModel> snapshot) {
+          if (snapshot.hasData) {
+            String imagePath =
+                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
+            return ListView(
+              physics: const BouncingScrollPhysics(),
+              children: [
+                ProfileWidget(
+                  imagePath: imagePath,
+                  onClicked: () async {},
+                ),
+                const SizedBox(height: 24),
+                buildName(snapshot.data!),
+                const SizedBox(height: 48),
+                buildAbout(snapshot.data!),
+              ],
+            );
+          }
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(
+                child: Text(
+                  "Can't connect to the server\n right now",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            );
+          }
+          return const Center(
+            child: CircularProgressIndicator(
+              color: Color.fromARGB(255, 31, 21, 87),
+            ),
+          );
+        }),
       ),
     );
   }
 
-  Widget buildName(User user) => Column(
+  Widget buildName(AuthorisedUserModel user) => Column(
         children: [
           Text(
-            user.name,
+            '@${user.userName}',
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
           ),
           const SizedBox(height: 4),
@@ -44,7 +78,7 @@ class _Our_profile_pageState extends State<Our_profile_page> {
         ],
       );
 
-  Widget buildAbout(User user) => Container(
+  Widget buildAbout(AuthorisedUserModel user) => Container(
         padding: const EdgeInsets.symmetric(horizontal: 48),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -55,8 +89,11 @@ class _Our_profile_pageState extends State<Our_profile_page> {
             ),
             const SizedBox(height: 16),
             Text(
-              user.about,
-              style: TextStyle(fontSize: 16, height: 1.4),
+              user.profileText != null ? user.profilePic! : "No about",
+              style: const TextStyle(
+                fontSize: 16,
+                height: 1.4,
+              ),
             ),
           ],
         ),
@@ -207,32 +244,4 @@ class ButtonWidget extends StatelessWidget {
         onPressed: onClicked,
         child: Text(text),
       );
-}
-
-class UserPreferences {
-  static const myUser = User(
-    imagePath:
-        'https://images.unsplash.com/photo-1554151228-14d9def656e4?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=333&q=80',
-    name: 'Sarah Abs',
-    email: 'sarah.abs@gmail.com',
-    about:
-        'Certified Personal Trainer and Nutritionist with years of experience in creating effective diets and training plans focused on achieving individual customers goals in a smooth way.',
-    isDarkMode: false,
-  );
-}
-
-class User {
-  final String imagePath;
-  final String name;
-  final String email;
-  final String about;
-  final bool isDarkMode;
-
-  const User({
-    required this.imagePath,
-    required this.name,
-    required this.email,
-    required this.about,
-    required this.isDarkMode,
-  });
 }

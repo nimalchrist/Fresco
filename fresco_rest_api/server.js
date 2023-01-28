@@ -8,13 +8,6 @@ require("dotenv").config();
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator')
 
-// db connection configurations
-var dbConn = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'Ninunimal@2',
-    database: 'fresco_db'
-});
 
 var dbConn = mysql.createPool({
     host: 'localhost',
@@ -23,9 +16,6 @@ var dbConn = mysql.createPool({
     database: 'fresco_db',
     connectionLimit: 10,  
 });
-
-
-
 
 
 //mail transporter
@@ -77,7 +67,7 @@ app.get('/users', function (req, res) {
             if (error) {
                 return res.status(500).send("Server error");
             }
-            return res.json(results);
+            res.json(results);
             connection.release();
         });
     });
@@ -122,8 +112,32 @@ app.get('/users/:id', function(req, res) {
 });
 
 
+//retrieve the authenticated user
+app.get('/auth_user/:id', function(req, res){
+    user_id = req.params.id;
+    dbConn.getConnection(function(err, connection) {
+        if (err) {
+            res.status(500).send("Error getting connection from the pool");
+        }
+        connection.query('Select user_id, profile_pic, user_name, email, password, profile_text, registered_at from users where user_id = ?', user_id, function(error, result) {
+            if (error) {
+                return res.status(500).send("Server error");
+            }
+            res.status(200).json(result);
+            connection.release();
+        });
+    });
+});
+
 //Create user API
 app.post('/register', function(req, res){
+    let generatedOtp = otpGenerator.generate(4, {
+        algorithm: 'SHA1',
+        digits: true,
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+    });
     let values = [req.body.username, req.body.email, req.body.password, generatedOtp];
     let email = req.body.email;
     dbConn.getConnection(function(err, connection) {
@@ -140,19 +154,13 @@ app.post('/register', function(req, res){
             }else{
                 connection.query("Insert into users(user_name, email, password, otp_generated) values(?)",[values], function(error, result){
                     if (error) throw (error);
+                    //otp generator
                     connection.query("Select user_id from users where email = ?",[email],function(error, result){
                         if (error) {
                             throw error;
                         }
                         res.status(200).json({message: "registered successfully",user_id: result[0].user_id});
-                        //otp generator
-                        let generatedOtp = otpGenerator.generate(4, {
-                            algorithm: 'SHA1',
-                            digits: true,
-                            lowerCaseAlphabets: false,
-                            upperCaseAlphabets: false,
-                            specialChars: false,
-                        });
+
                         let mailOptions = {
                             from: 'selvanimal0@gmail.com',
                             to: req.body.email,
@@ -174,7 +182,7 @@ app.post('/register', function(req, res){
                                             </style>
                                         </head>
                                         <body>
-                                            <h1>Title</h1>
+                                            <h1>Fresco</h1>
                                             <p>We are excited to have you here.</p>
                                             <p>Thank you for visiting.</p>
                                             <h2>Your OTP is ${generatedOtp}</h2>

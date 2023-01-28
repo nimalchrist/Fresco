@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:fresco/app_pages/LoginPage.dart';
-import 'package:fresco/app_pages/Otp_page.dart';
-import 'package:fresco/app_pages/RegisterPage.dart';
 import 'app_pages/App_layout_controller.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
+  Future<int?> get checkLogined async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    int? userId = prefs.getInt("user_id");
+    if (userId == null) {
+      return 0;
+    }
+    return userId;
+  }
+
   const MyApp({super.key});
 
   @override
@@ -22,7 +30,30 @@ class MyApp extends StatelessWidget {
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
       ),
-      home: const LoginPage(),
+      home: FutureBuilder(
+        future: checkLogined,
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            if (snapshot.data != 0) {
+              dynamic userId = snapshot.data;
+              print(userId);
+              print(userId.runtimeType);
+              return AppLayout(authorisedUser: userId);
+            } else {
+              return LoginPage();
+            }
+          }
+          if (snapshot.hasError) {
+            return const Scaffold(
+              body: Center(
+                  child: CircularProgressIndicator(
+                backgroundColor: Color.fromARGB(255, 31, 21, 87),
+              )),
+            );
+          }
+          return const LoginPage();
+        },
+      ),
     );
   }
 }

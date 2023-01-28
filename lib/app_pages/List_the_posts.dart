@@ -139,7 +139,7 @@ class _List_the_postsState extends State<List_the_posts> {
 
   Widget Post_content(String post_content) {
     String _post_content =
-        'http://192.168.47.221:8000/post_contents/$post_content';
+        'http://192.168.112.221:8000/post_contents/$post_content';
     return AspectRatio(
       aspectRatio: 1,
       child: CachedNetworkImage(

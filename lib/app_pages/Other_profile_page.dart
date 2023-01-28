@@ -42,11 +42,13 @@ class _Other_profile_pageState extends State<Other_profile_page> {
               ],
             );
           } else if (snapshot.hasError) {
-            throw "Error with snapshot";
+            return const CircularProgressIndicator();
           }
 
           return const Center(
-            child: CircularProgressIndicator(),
+            child: CircularProgressIndicator(
+              color: Color.fromARGB(255, 31, 21, 87),
+            ),
           );
         }),
       ),
@@ -98,9 +100,9 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             Text(
               TimeFormatter(user.registeredAt!),
               style: const TextStyle(
-                fontSize: 16,
+                fontSize: 15,
                 height: 3.4,
-                fontWeight: FontWeight.bold,
+                fontWeight: FontWeight.w400,
               ),
             )
           ],

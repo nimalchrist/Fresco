@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import './RegisterPage.dart';
 import '../http_operations/http_services.dart';
+import './Otp_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -148,13 +149,102 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                               onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
+                                  // FutureBuilder(
+                                  //   future: httpService.loginUser(
+                                  //     _emailController.text,
+                                  //     _passwordController.text,
+                                  //   ),
+                                  //   builder: (
+                                  //     BuildContext context,
+                                  //     AsyncSnapshot<dynamic> snapshot,
+                                  //   ) {
+                                  //     if (snapshot.hasData) {
+                                  //       List<dynamic> responses = snapshot.data;
+                                  //       if (responses.length == 2) {
+                                  //         ScaffoldMessenger.of(context)
+                                  //             .showSnackBar(
+                                  //           SnackBar(
+                                  //             content: Text(responses[0]),
+                                  //           ),
+                                  //         );
+                                  //         Navigator.of(context)
+                                  //             .pushAndRemoveUntil(
+                                  //           MaterialPageRoute(
+                                  //             builder: (BuildContext context) =>
+                                  //                 OtpScreen(
+                                  //               authorisedUser: responses[1],
+                                  //             ),
+                                  //           ),
+                                  //           (Route<dynamic> route) => false,
+                                  //         );
+                                  //       } else {
+                                  //         showDialog(
+                                  //           context: context,
+                                  //           barrierDismissible: false,
+                                  //           builder: (ctx) => AlertDialog(
+                                  //             title: const Text("Login Failed"),
+                                  //             content: Text(responses[0]),
+                                  //             actions: <Widget>[
+                                  //               TextButton(
+                                  //                 onPressed: () {
+                                  //                   Navigator.of(ctx).pop();
+                                  //                 },
+                                  //                 child: Container(
+                                  //                   color: const Color.fromARGB(
+                                  //                       226, 32, 32, 99),
+                                  //                   padding:
+                                  //                       const EdgeInsets.only(
+                                  //                     left: 14,
+                                  //                     right: 14,
+                                  //                     top: 5,
+                                  //                     bottom: 5,
+                                  //                   ),
+                                  //                   child: const Text(
+                                  //                     "Okay",
+                                  //                     style: TextStyle(
+                                  //                       color: Colors.white,
+                                  //                       fontWeight:
+                                  //                           FontWeight.bold,
+                                  //                     ),
+                                  //                   ),
+                                  //                 ),
+                                  //               ),
+                                  //             ],
+                                  //           ),
+                                  //         );
+                                  //       }
+                                  //     }
+                                  //     return const CircularProgressIndicator();
+                                  //   },
+                                  // );
                                   // If the form is valid, display a snackbar. In the real world,
                                   // you'd often call a server or save the information in a database.
-                                  await httpService.loginUser(
+                                  List<dynamic> responses =
+                                      await httpService.loginUser(
                                     _emailController.text,
                                     _passwordController.text,
-                                    context,
                                   );
+                                  if (responses.length == 2) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(responses[0]),
+                                      ),
+                                    );
+                                    Navigator.of(context).pushAndRemoveUntil(
+                                      MaterialPageRoute(
+                                        builder: (BuildContext context) =>
+                                            OtpScreen(
+                                                authorisedUser: responses[1]),
+                                      ),
+                                      (Route<dynamic> route) => false,
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text(responses[0]),
+                                      ),
+                                    );
+                                  }
                                 }
                               },
                               child: const Text('Login'),
