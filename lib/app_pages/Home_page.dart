@@ -1,20 +1,36 @@
 import 'package:flutter/material.dart';
+import './List_the_posts.dart';
+import './Search_button.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+class Home_page extends StatefulWidget {
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<Home_page> createState() => _Home_pageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _Home_pageState extends State<Home_page> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 5,
-        shadowColor: Colors.black26,
+      body: Stack(
+        children: <Widget>[
+          Scaffold(
+            backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+            appBar: AppBar(
+              title: const Text(
+                "Fresco",
+                style: TextStyle(
+                  color: Color.fromARGB(255, 49, 35, 131),
+                ),
+              ),
+              backgroundColor: Colors.transparent,
+              elevation: 0.0,
+              actions: const [
+                Search_here(),
+              ],
+            ),
+            body: const List_the_posts(),
+          ),
+        ],
       ),
     );
   }
