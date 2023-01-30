@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fresco/app_pages/LoginPage.dart';
-import 'app_pages/App_layout_controller.dart';
+import 'app_pages/AppLayoutController.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
       title: 'Fresco app',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primaryColor: const Color.fromARGB(255, 31, 21, 87),
+        primaryColor: const Color.fromARGB(255, 255, 255, 255),
         splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
         hoverColor: Colors.transparent,
@@ -40,7 +40,7 @@ class MyApp extends StatelessWidget {
               print(userId.runtimeType);
               return AppLayout(authorisedUser: userId);
             } else {
-              return LoginPage();
+              return const LoginPage();
             }
           }
           if (snapshot.hasError) {
@@ -51,7 +51,18 @@ class MyApp extends StatelessWidget {
               )),
             );
           }
-          return const LoginPage();
+          return const Scaffold(
+            body: Center(
+              child: Text(
+                "Loading...",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Color.fromARGB(255, 31, 21, 87),
+                ),
+              ),
+            ),
+          );
         },
       ),
     );

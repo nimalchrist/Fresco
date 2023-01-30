@@ -2,7 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import './RegisterPage.dart';
 import '../http_operations/http_services.dart';
-import './Otp_page.dart';
+import 'OtpPage.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});

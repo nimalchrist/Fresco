@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../http_operations/http_services.dart';
-import './Otp_page.dart';
+import 'OtpPage.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
