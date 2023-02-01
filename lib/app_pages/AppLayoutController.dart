@@ -75,8 +75,8 @@ class _AppLayoutState extends State<AppLayout> {
             },
             children: [
               Home_page(),
-              const Notification_received(),
-              const Notification_received(),
+              const NotificationPage(),
+              const NotificationPage(),
               Our_profile_page(
                 authorisedUser: authorisedUser,
               ),
@@ -95,7 +95,9 @@ class _AppLayoutState extends State<AppLayout> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const CreatePost(),
+                  builder: (context) => CreatePost(
+                    authorisedUser: authorisedUser,
+                  ),
                 ),
               );
             },

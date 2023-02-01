@@ -5,6 +5,7 @@ import '../http_operations/http_services.dart';
 import '../http_operations/post_list_model.dart';
 import 'package:path/path.dart' as path;
 import './VideoPlayerWidget.dart';
+import './AudioPlayerWidget.dart';
 
 class ListThePosts extends StatefulWidget {
   const ListThePosts({super.key});
@@ -14,6 +15,10 @@ class ListThePosts extends StatefulWidget {
 }
 
 class _ListThePostsState extends State<ListThePosts> {
+  String timeFormatter(DateTime data) {
+    return "Posted at: ${data.day}${data.month}.${data.year}  ${data.hour}:${data.minute}";
+  }
+
   Httpservice httpService = Httpservice();
 
   Widget postListView(BuildContext context) {
@@ -22,11 +27,14 @@ class _ListThePostsState extends State<ListThePosts> {
       builder:
           (BuildContext context, AsyncSnapshot<List<PostListModel>> snapshot) {
         if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data!.length,
-            itemBuilder: (context, i) {
-              return postContainer(context, snapshot.data![i]);
-            },
+          return GestureDetector(
+            onLongPress: () {},
+            child: ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, i) {
+                return postContainer(context, snapshot.data![i]);
+              },
+            ),
           );
         } else if (snapshot.hasError) {
           return const Center(
@@ -58,10 +66,13 @@ class _ListThePostsState extends State<ListThePosts> {
           content.userId,
           content.profilePic,
           content.userName,
-          content.postTitle,
+          content.timePosted!,
         ),
         postContent(
+          content.postTitle,
           content.postContent,
+          content.profilePic,
+          content.userName,
         ),
         postSummary(
           content.postSummary,
@@ -76,7 +87,8 @@ class _ListThePostsState extends State<ListThePosts> {
   }
 
   Widget authorInfo(BuildContext context, int userId, String profilePic,
-      String userName, String postTitle) {
+      String userName, DateTime timePosted) {
+    String postedTime = timeFormatter(timePosted);
     const double avatarDiameter = 44;
     var Avatar = 'http://192.168.112.221:8000/profile_pics/$profilePic';
     return Row(
@@ -117,20 +129,20 @@ class _ListThePostsState extends State<ListThePosts> {
               '@$userName',
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 12,
-                color: Colors.black38,
-              ),
-            ),
-            Text(
-              postTitle,
-              style: const TextStyle(
-                fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Colors.black,
               ),
             ),
+            Text(
+              postedTime,
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                color: Colors.black38,
+              ),
+            ),
           ],
-        )
+        ),
       ],
     );
   }
@@ -158,7 +170,8 @@ class _ListThePostsState extends State<ListThePosts> {
     );
   }
 
-  Widget postContent(String postContent) {
+  Widget postContent(String postTitle, String postContent, String profilePic,
+      String userName) {
     String postURL = 'http://192.168.112.221:8000/post_contents/$postContent';
 
     String fileExtension = path.extension(postURL);
@@ -166,17 +179,53 @@ class _ListThePostsState extends State<ListThePosts> {
         fileExtension == '.jpeg' ||
         fileExtension == '.png') {
       // It's an image
-      return Padding(
-        padding: const EdgeInsets.only(left: 14.0, right: 14),
-        child: CachedNetworkImage(
-          fit: BoxFit.cover,
-          imageUrl: postURL,
-        ),
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              postTitle,
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 14.0, right: 14),
+            child: CachedNetworkImage(
+              fit: BoxFit.cover,
+              imageUrl: postURL,
+            ),
+          ),
+        ],
       );
     } else if (fileExtension == '.mp4') {
-      return Padding(
-        padding: const EdgeInsets.only(left: 14, right: 14),
-        child: PostVideoPlayer(videoURL: postURL),
+      return Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              postTitle,
+              textAlign: TextAlign.start,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 14, right: 14),
+            child: PostVideoPlayer(videoURL: postURL),
+          ),
+        ],
+      );
+    } else if (fileExtension == '.mp3') {
+      return PostAudioPlayer(
+        audioURL: postURL,
+        profilePic: profilePic,
+        userName: userName,
       );
     }
     return const Text("Wait panra ngotha nerla varenda");

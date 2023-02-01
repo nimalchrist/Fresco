@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:fresco/http_operations/authorised_user_model.dart';
 import 'package:http/http.dart' as http;
 import './post_list_model.dart';
@@ -55,7 +56,7 @@ class Httpservice {
     }
   }
 
-// otp verification of register
+// otp verification
   Future<List<dynamic>> otpVerification(String otp, int userId) async {
     try {
       // Make the HTTP request to the server
@@ -134,5 +135,31 @@ class Httpservice {
       return AuthUser;
     }
     throw "Error while calling";
+  }
+
+  //upload post to the server
+  Future<List<String>> uploadPost(int userId, String postTitle,
+      String postSummary, File postContent) async {
+    Uri url = Uri.parse('http://192.168.112.221:8000/$userId/upload_post');
+    print(url);
+    var request = http.MultipartRequest('POST', url);
+
+    request.fields['post_title'] = postTitle;
+    request.fields['author_id'] = userId.toString();
+    request.fields['post_summary'] = postSummary;
+    request.files.add(
+      await http.MultipartFile.fromPath('uploadedFile', postContent.path),
+    );
+    print(request);
+
+    var getResponse = await request.send();
+    var response = await http.Response.fromStream(getResponse);
+    print(response);
+    dynamic rawMessage = jsonDecode(response.body);
+    String message = rawMessage['message'];
+    if (response.statusCode == 200) {
+      return [message, "success"];
+    }
+    return [message];
   }
 }

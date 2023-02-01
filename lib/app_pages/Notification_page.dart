@@ -1,18 +1,38 @@
 import 'package:flutter/material.dart';
 
-class Notification_received extends StatefulWidget {
-  const Notification_received({super.key});
+class NotificationPage extends StatelessWidget {
+  const NotificationPage({super.key});
 
-  @override
-  State<Notification_received> createState() => _Notification_receivedState();
-}
-
-class _Notification_receivedState extends State<Notification_received> {
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: const Color.fromARGB(255, 223, 222, 222),
-      child: const Center(child: Text("Notifications")),
+    return Scaffold(
+      body: Stack(
+        children: const [
+          Padding(
+            padding: EdgeInsets.only(top: 150.0),
+            child: Center(
+              child: Text(
+                "Sorry under maintenance",
+                style: TextStyle(
+                    color: Colors.grey,
+                    fontSize: 26,
+                    fontStyle: FontStyle.normal),
+              ),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 200.0),
+            child: Center(
+              child: Image(
+                  height: 800,
+                  width: 800,
+                  image: AssetImage(
+                    'assets/images/girl.png',
+                  )),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

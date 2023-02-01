@@ -36,8 +36,6 @@ class MyApp extends StatelessWidget {
           if (snapshot.hasData) {
             if (snapshot.data != 0) {
               dynamic userId = snapshot.data;
-              print(userId);
-              print(userId.runtimeType);
               return AppLayout(authorisedUser: userId);
             } else {
               return const LoginPage();
