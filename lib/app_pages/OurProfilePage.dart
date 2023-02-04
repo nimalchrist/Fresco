@@ -26,7 +26,7 @@ class _Our_profile_pageState extends State<Our_profile_page> {
             AsyncSnapshot<AuthorisedUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.1.9:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
@@ -153,11 +153,13 @@ Widget buildBottomSheet(BuildContext context) {
 
 class ProfileWidget extends StatelessWidget {
   final String imagePath;
+  final bool isEdit;
   final VoidCallback onClicked;
 
   const ProfileWidget({
     Key? key,
     required this.imagePath,
+    this.isEdit=false,
     required this.onClicked,
   }) : super(key: key);
 

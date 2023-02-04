@@ -30,7 +30,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.1.9:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [

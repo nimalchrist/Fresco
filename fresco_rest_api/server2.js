@@ -13,8 +13,8 @@ const otpGenerator = require('otp-generator')
 var dbConn = mysql.createPool({
     host: 'localhost',
     user: 'root',
-    password: 'Ninunimal@2',
-    database: 'fresco_db',
+    password: 'fency@07',
+    database: 'mydb',
     connectionLimit: 10,  
 });
 
@@ -22,8 +22,8 @@ var dbConn = mysql.createPool({
 let transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
-        user: 'selvanimal0@gmail.com',
-        pass: 'hgtdeekqowaqlkuv'
+        user: 'fencyj854@gmail.com',
+        pass: 'asdf'
     }
 });
 
@@ -176,7 +176,7 @@ app.post('/register', function(req, res){
                         res.status(200).json({message: "registered successfully",user_id: result[0].user_id});
 
                         let mailOptions = {
-                            from: 'selvanimal0@gmail.com',
+                            from: 'fencyj854@gmail.com',
                             to: req.body.email,
                             subject: 'OTP for verification',
                             html: `<html>
@@ -244,7 +244,7 @@ app.post('/login', (req, res)=>{
                             specialChars: false,
                         });
                         let mailOptions = {
-                            from: 'selvanimal0@gmail.com',
+                            from: 'fencyj854@gmail.com',
                             to: req.body.email,
                             subject: 'OTP for verification',
                             html: `<html>
