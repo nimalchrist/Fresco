@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
-import '../app_pages/OurProfilePage.dart';
+import 'package:fresco/app_pages/ImageViewer.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String profilePic;
   final String userName;
   final String userAbout;
 
-  EditProfilePage(
-      {Key? key,
-      required this.profilePic,
-      required this.userName,
-      required this.userAbout});
+  EditProfilePage({
+    Key? key,
+    required this.profilePic,
+    required this.userName,
+    required this.userAbout,
+  });
 
   @override
   _EditProfilePageState createState() =>
@@ -22,6 +23,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
   final String userName;
   final String userAbout;
   _EditProfilePageState(this.profilePic, this.userName, this.userAbout);
+
+  late TextEditingController name_controller;
+  late TextEditingController about_controller;
+  GlobalKey _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    name_controller = TextEditingController(text: userName);
+    about_controller = TextEditingController(text: userAbout);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,98 +62,126 @@ class _EditProfilePageState extends State<EditProfilePage> {
           padding: const EdgeInsets.only(
             top: 40.0,
           ),
-          child: ListView(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            physics: const BouncingScrollPhysics(),
-            children: [
-              ProfileWidget(
-                imagePath: profilePic,
-                onClicked: () {},
-              ),
-              const SizedBox(height: 24),
-              TextFieldWidget(
-                label: 'User Name',
-                text: userName,
-                onChanged: (name) {},
-              ),
-              const SizedBox(height: 24),
-              TextFieldWidget(
-                label: 'About',
-                text: userAbout,
-                maxLines: 5,
-                onChanged: (about) {},
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 32.0),
-                child: TextButton(
-                  onPressed: () {},
-                  child: const Text('Save'),
+          child: Form(
+            key: _formKey,
+            child: ListView(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              physics: const BouncingScrollPhysics(),
+              children: [
+                Center(
+                  child: Stack(
+                    children: [
+                      ClipOval(
+                        child: Material(
+                          color: Colors.transparent,
+                          child: Ink.image(
+                            image: NetworkImage(profilePic),
+                            fit: BoxFit.cover,
+                            width: 128,
+                            height: 128,
+                            child: InkWell(
+                              onTap: () {},
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 4,
+                        child: ClipOval(
+                          child: Container(
+                            padding: EdgeInsets.all(3),
+                            color: Colors.white,
+                            child: ClipOval(
+                              child: Container(
+                                padding: EdgeInsets.all(8),
+                                color: Color.fromARGB(230, 31, 21, 87),
+                                child: GestureDetector(
+                                  onTap: () {},
+                                  child: const Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        // child: buildEditIcon(
+                        //   Theme.of(context).colorScheme.primary,
+                        // ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "User Name",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      validator: (value) {
+                        if (value!.isEmpty) {
+                          return "User Name can't be empty";
+                        }
+                        return null;
+                      },
+                      controller: name_controller,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: Color.fromARGB(40, 141, 156, 204),
+                      ),
+                      maxLines: 1,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      "About",
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: about_controller,
+                      decoration: const InputDecoration(
+                        border: InputBorder.none,
+                        filled: true,
+                        fillColor: Color.fromARGB(40, 141, 156, 204),
+                      ),
+                      maxLines: 5,
+                    ),
+                  ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 32.0),
+                  child: TextButton(
+                    onPressed: () {
+                      print(name_controller.text);
+                      print(about_controller.text);
+                    },
+                    child: const Text('Save'),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class TextFieldWidget extends StatefulWidget {
-  final int maxLines;
-  final String label;
-  final String text;
-  final ValueChanged<String> onChanged;
-
-  const TextFieldWidget({
-    Key? key,
-    this.maxLines = 1,
-    required this.label,
-    required this.text,
-    required this.onChanged,
-  }) : super(key: key);
-
-  @override
-  _TextFieldWidgetState createState() => _TextFieldWidgetState();
-}
-
-class _TextFieldWidgetState extends State<TextFieldWidget> {
-  late final TextEditingController controller;
-
-  @override
-  void initState() {
-    super.initState();
-    controller = TextEditingController(text: widget.text);
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            border: InputBorder.none,
-            filled: true,
-            fillColor: Color.fromARGB(40, 141, 156, 204),
-          ),
-          maxLines: widget.maxLines,
-        ),
-      ],
     );
   }
 }
