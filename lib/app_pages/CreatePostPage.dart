@@ -25,7 +25,7 @@ class _CreatePostState extends State<CreatePost> {
   FilePickerResult? audioPicker;
   late PlatformFile audioFile;
   bool isAudio = false;
-  final authorisedUser;
+  final int authorisedUser;
   late Httpservice httpService;
   _CreatePostState(this.authorisedUser);
 

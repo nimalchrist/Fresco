@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:fresco/app_pages/ImageViewer.dart';
+import 'package:image_picker/image_picker.dart';
 
 class EditProfilePage extends StatefulWidget {
   final String profilePic;
@@ -27,12 +29,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController name_controller;
   late TextEditingController about_controller;
   GlobalKey _formKey = GlobalKey<FormState>();
+  File? updatedProfile;
 
   @override
   void initState() {
     super.initState();
     name_controller = TextEditingController(text: userName);
     about_controller = TextEditingController(text: userAbout);
+  }
+
+  void getProfilePic(ImageSource source) async {
+    final profile = await ImagePicker().pickImage(source: source);
+    File profileTemp = File(profile!.path);
+    setState(() {
+      updatedProfile = profileTemp;
+    });
   }
 
   @override
@@ -68,36 +79,111 @@ class _EditProfilePageState extends State<EditProfilePage> {
               padding: const EdgeInsets.symmetric(horizontal: 32),
               physics: const BouncingScrollPhysics(),
               children: [
+                //code for profile with edit icon
                 Center(
                   child: Stack(
                     children: [
-                      ClipOval(
-                        child: Material(
-                          color: Colors.transparent,
-                          child: Ink.image(
-                            image: NetworkImage(profilePic),
-                            fit: BoxFit.cover,
-                            width: 128,
-                            height: 128,
-                            child: InkWell(
-                              onTap: () {},
+                      updatedProfile == null
+                          ? ClipOval(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Ink.image(
+                                  image: NetworkImage(profilePic),
+                                  fit: BoxFit.cover,
+                                  width: 128,
+                                  height: 128,
+                                ),
+                              ),
+                            )
+                          : ClipOval(
+                              child: Material(
+                                color: Colors.transparent,
+                                child: Image.file(
+                                  updatedProfile!,
+                                  fit: BoxFit.cover,
+                                  width: 128,
+                                  height: 128,
+                                ),
+                              ),
                             ),
-                          ),
-                        ),
-                      ),
+
+                      // edit icon styling
                       Positioned(
                         bottom: 0,
                         right: 4,
                         child: ClipOval(
                           child: Container(
-                            padding: EdgeInsets.all(3),
+                            padding: const EdgeInsets.all(3),
                             color: Colors.white,
                             child: ClipOval(
                               child: Container(
-                                padding: EdgeInsets.all(8),
-                                color: Color.fromARGB(230, 31, 21, 87),
+                                padding: const EdgeInsets.all(8),
+                                color: const Color.fromARGB(230, 31, 21, 87),
                                 child: GestureDetector(
-                                  onTap: () {},
+                                  onTap: () {
+                                    showDialog(
+                                      barrierDismissible: false,
+                                      context: context,
+                                      builder: (context) => AlertDialog(
+                                        content: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            const SizedBox(
+                                              height: 15,
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                getProfilePic(
+                                                    ImageSource.gallery);
+                                              },
+                                              child: const Text(
+                                                "Select From Gallery",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Color.fromRGBO(
+                                                      31, 21, 87, 1),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              height: 5,
+                                            ),
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                                getProfilePic(
+                                                    ImageSource.camera);
+                                              },
+                                              child: const Text(
+                                                "Select From Camera",
+                                                style: TextStyle(
+                                                  fontWeight: FontWeight.bold,
+                                                  fontSize: 20,
+                                                  color: Color.fromRGBO(
+                                                      31, 21, 87, 1),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: const Text(
+                                              "Cancel",
+                                              style: TextStyle(
+                                                fontSize: 20,
+                                              ),
+                                            ),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  },
                                   child: const Icon(
                                     Icons.edit,
                                     color: Colors.white,
@@ -108,9 +194,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
                             ),
                           ),
                         ),
-                        // child: buildEditIcon(
-                        //   Theme.of(context).colorScheme.primary,
-                        // ),
                       ),
                     ],
                   ),
@@ -173,6 +256,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     onPressed: () {
                       print(name_controller.text);
                       print(about_controller.text);
+                      if (updatedProfile != null) {
+                        //easy implementation
+                      } else {
+                        // convert the url to file then send the data
+                      }
                     },
                     child: const Text('Save'),
                   ),

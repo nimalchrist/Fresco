@@ -141,7 +141,6 @@ class Httpservice {
   Future<List<String>> uploadPost(int userId, String postTitle,
       String postSummary, File postContent) async {
     Uri url = Uri.parse('http://192.168.164.221:8000/$userId/upload_post');
-    print(url);
     var request = http.MultipartRequest('POST', url);
 
     request.fields['post_title'] = postTitle;
@@ -150,16 +149,37 @@ class Httpservice {
     request.files.add(
       await http.MultipartFile.fromPath('uploadedFile', postContent.path),
     );
-    print(request);
-
     var getResponse = await request.send();
     var response = await http.Response.fromStream(getResponse);
-    print(response);
     dynamic rawMessage = jsonDecode(response.body);
     String message = rawMessage['message'];
     if (response.statusCode == 200) {
       return [message, "success"];
     }
     return [message];
+  }
+
+  //edit profile request
+  Future<String?> editProfile(
+      int userId, File userProfile, String userName, String userAbout) async {
+    Uri url = Uri.parse('http://192.168.164.221:8000/edit_profile/$userId');
+    var request = http.MultipartRequest('POST', url);
+
+    request.files.add(
+      await http.MultipartFile.fromPath('profilePic', userProfile.path),
+    );
+    request.fields['userName'] = userName;
+    request.fields['profileSummary'] = userAbout;
+
+    var getResponse = await request.send();
+    var response = await http.Response.fromStream(getResponse);
+    dynamic rawMessage = jsonDecode(response.body);
+    String message = rawMessage['message'];
+
+    if (response.statusCode == 200) {
+      return message;
+    } else {
+      return null;
+    }
   }
 }
