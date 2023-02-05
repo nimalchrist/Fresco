@@ -15,7 +15,7 @@ class Httpservice {
     map["email"] = email;
     map["password"] = password;
 
-    var url = Uri.parse('http://192.168.112.221:8000/register');
+    var url = Uri.parse('http://192.168.164.221:8000/register');
     http.Response res = await http.post(url, body: map);
     var loginResponseData = jsonDecode(res.body);
 
@@ -39,7 +39,7 @@ class Httpservice {
     map["email"] = email;
     map["password"] = password;
 
-    var url = Uri.parse('http://192.168.112.221:8000/login');
+    var url = Uri.parse('http://192.168.164.221:8000/login');
     http.Response res = await http.post(url, body: map);
     var loginResponseData = jsonDecode(res.body);
 
@@ -60,7 +60,7 @@ class Httpservice {
   Future<List<dynamic>> otpVerification(String otp, int userId) async {
     try {
       // Make the HTTP request to the server
-      var url = Uri.parse('http://192.168.112.221:8000/otp');
+      var url = Uri.parse('http://192.168.164.221:8000/otp');
       var map = Map<String, dynamic>();
       map["otp"] = otp;
       map["id"] = userId.toString();
@@ -92,7 +92,7 @@ class Httpservice {
 
 // get all the posts
   Future<List<PostListModel>> getPosts() async {
-    var url = Uri.parse('http://192.168.112.221:8000/posts');
+    var url = Uri.parse('http://192.168.164.221:8000/posts');
     http.Response res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -111,7 +111,7 @@ class Httpservice {
 
 // get the other user
   Future<OtherUserModel> getOtherUser(int userId) async {
-    var url = Uri.parse('http://192.168.112.221:8000/users/$userId');
+    var url = Uri.parse('http://192.168.164.221:8000/users/$userId');
     http.Response res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -125,7 +125,7 @@ class Httpservice {
 
   //get the authorised user
   Future<AuthorisedUserModel> getAuthorisedUser(int userId) async {
-    var url = Uri.parse('http://192.168.112.221:8000/auth_user/$userId');
+    var url = Uri.parse('http://192.168.164.221:8000/auth_user/$userId');
     http.Response res = await http.get(url);
 
     if (res.statusCode == 200) {
@@ -140,7 +140,7 @@ class Httpservice {
   //upload post to the server
   Future<List<String>> uploadPost(int userId, String postTitle,
       String postSummary, File postContent) async {
-    Uri url = Uri.parse('http://192.168.112.221:8000/$userId/upload_post');
+    Uri url = Uri.parse('http://192.168.164.221:8000/$userId/upload_post');
     print(url);
     var request = http.MultipartRequest('POST', url);
 

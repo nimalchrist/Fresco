@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../http_operations/http_services.dart';
 import '../http_operations/other_user_model.dart';
+import './ImageViewer.dart';
 
 class Other_profile_page extends StatefulWidget {
   final int user_id;
@@ -16,8 +18,8 @@ class _Other_profile_pageState extends State<Other_profile_page> {
   Httpservice httpservice = Httpservice();
   _Other_profile_pageState({required this.user_id});
 
-  String TimeFormatter(DateTime data) {
-    return "${data.day} - ${data.month} - ${data.year}";
+  String TimeFormatter(DateTime dateTime) {
+    return DateFormat.yMMMMd().format(dateTime);
   }
 
   @override
@@ -30,11 +32,21 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.164.221:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
-                ProfileWidget(imagePath: imagePath),
+                GestureDetector(
+                  child: ProfileWidget(imagePath: imagePath),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ImageViewer(imageURL: imagePath),
+                      ),
+                    );
+                  },
+                ),
                 const SizedBox(height: 24),
                 buildName(snapshot.data!),
                 const SizedBox(height: 48),
@@ -121,9 +133,6 @@ AppBar buildAppBar(BuildContext context) {
 
 class ProfileWidget extends StatelessWidget {
   final String imagePath;
-  onClicked() {
-    print("Image tapped");
-  }
 
   const ProfileWidget({
     Key? key,
@@ -152,7 +161,6 @@ class ProfileWidget extends StatelessWidget {
           fit: BoxFit.cover,
           width: 128,
           height: 128,
-          child: InkWell(onTap: onClicked),
         ),
       ),
     );

@@ -3,12 +3,13 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var mysql = require('mysql2');
-const fileUpload = require('express-fileupload');
+const multer = require('multer');
 require("dotenv").config();
 const nodemailer = require('nodemailer');
 const otpGenerator = require('otp-generator')
 
 
+//db pool connecton
 var dbConn = mysql.createPool({
     host: 'localhost',
     user: 'root',
@@ -16,7 +17,6 @@ var dbConn = mysql.createPool({
     database: 'fresco_db',
     connectionLimit: 10,  
 });
-
 
 //mail transporter
 let transporter = nodemailer.createTransport({
@@ -27,6 +27,7 @@ let transporter = nodemailer.createTransport({
     }
 });
 
+
 //middle wares
 app.use(bodyParser.json());
 app.use(express.json());
@@ -34,15 +35,49 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-app.use(
-    fileUpload({
-        limits: {
-            fileSize: 10000000,
-        },
-        abortOnLimit: true,
-    }),
-);
+// disk storage for post
+const postStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __dirname + '/post_contents');
+    },
+    fileFilter(file, cb) {
+        // Allowed file types
+        const allowedFileTypes = /\.(jpg|jpeg|png|mp4|mp3|txt)$/;
+        if (!file.originalname.match(allowedFileTypes)) {
+            return cb(new Error('Please upload a valid file type'));
+        }
+        cb(undefined, true);
+    },
+    limits: {
+        fileSize: 1000000
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+const upload_file = multer({ storage: postStorage });
 
+// disk storage for profile
+const profileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __dirname + '/profile_pics');
+    },
+    fileFilter(file, cb){
+        const allowedFileTypes = /\.(jpg|jpeg|png)$/;
+        if (!file.originalname.match(allowedFileTypes)) {
+            return cb(new Error('Please upload a valid file type'));
+        }
+        cb(undefined, true);
+    },
+    limits: {
+        fileSize: 1000000
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+const upload_profile = multer({ storage: profileStorage });
+ 
 
 //static accessing of images and videos
 app.use(express.static('public'));
@@ -129,6 +164,54 @@ app.get('/auth_user/:id', function(req, res){
     });
 });
 
+//edit the authenticated user --> profile
+app.post('/edit_profile/:user_id', upload_profile.single('profilePic'), function(req, res){
+    userId = req.params.user_id;
+
+    profilePic = req.file;
+    fileName = profilePic.originalname;
+    userName = req.body.userName;
+    profileText = req.body.profileSummary;
+    values = [fileName, userName, profileText, userId];
+    dbConn.getConnection(function(err, connection){
+        if (err) {
+            res.status(500).send({message: "Update failed try again later"});
+        }
+        connection.query('update users set profile_pic = ?, user_name = ?, profile_text = ? where user_id = ?', values, function(err){
+            if (err) {
+                return res.status(500).send({message: "Failed to update try again later"});
+            }
+            res.status(200).json({message: "Updated successfully"});
+            connection.release();
+        });
+    });
+});
+// app.post('/edit_profile/:user_id', profile_file.single('updatedProfilePic'), function(req, res){
+//     user_id = req.params.user_id;
+
+//     profile_pic_file = req.file;
+//     profile_pic = profile_pic_file.originalname;
+
+//     user_name = req.body.userName;
+//     profile_text = req.body.profileText;
+//     values = [profile_pic, user_name, profile_text, user_id];
+
+//     dbConn.getConnection(function(err, connection){
+//         if (err) {
+//             res.status(500).send({message: "Update failed try again later"});
+//         }
+//         connection.query('update users set profile_pic = ?, user_name = ?, profile_text = ? where user_id = ?', values, function(err){
+//             if (err) {
+//                 console.log(err);
+//                 return res.status(500).send({message: "Failed to update try again later"});
+//             }
+//             res.status(200).json({message: "Updated successfully"});
+//         });
+//     });
+// });
+
+//edit the authenticated user --> account
+
 //Create user API
 app.post('/register', function(req, res){
     let generatedOtp = otpGenerator.generate(4, {
@@ -203,26 +286,6 @@ app.post('/register', function(req, res){
     });
 });
 
-
-app.post('/otp', (req, res) => {
-    dbConn.getConnection(function(err, connection) {
-        if (err) throw (err);
-        let entered_otp = req.body.otp;
-        let authorised_user_id = req.body.id;
-        connection.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id], function(err, result){
-            if (err) throw (err);
-            if (entered_otp == result[0].otp_generated) {
-                res.status(200).json({user_id: result[0].user_id, message: "email verified successfully"});
-            }
-            else{
-                res.status(400).json({message: "Invalid otp"});
-            }
-            connection.release();
-        });
-    });
-});
-
-
 app.post('/login', (req, res)=>{
     const {email, password} = req.body;
     dbConn.getConnection(function(err, connection) {
@@ -294,6 +357,59 @@ app.post('/login', (req, res)=>{
         });
     });
 });
+
+app.post('/otp', (req, res) => {
+    dbConn.getConnection(function(err, connection) {
+        if (err) throw (err);
+        let entered_otp = req.body.otp;
+        let authorised_user_id = req.body.id;
+        connection.query("select user_id,otp_generated from users where user_id = ?", [authorised_user_id], function(err, result){
+            if (err) throw (err);
+            if (entered_otp == result[0].otp_generated) {
+                res.status(200).json({user_id: result[0].user_id, message: "email verified successfully"});
+            }
+            else{
+                res.status(400).json({message: "Invalid otp"});
+            }
+            connection.release();
+        });
+    });
+});
+
+app.post('/:user_id/upload_post', upload_file.single('uploadedFile'), async (req, res) => {
+    // Validate form fields
+    if (!req.body.post_title || !req.params.user_id || !req.body.post_summary) {
+        return res.status(400).json({message: "Missing required fields"});
+    }
+    // Validate file
+    if (!req.file) {
+        return res.status(400).json({message: "No file provided"});
+    }
+
+    console.log(req.body);
+    // The other form fields are available in req.body
+    const post_title = req.body.post_title;
+    const author_id = req.params.user_id;
+    const post_summary = req.body.post_summary;
+    const post_content = req.file;
+    
+    let file_name = post_content.originalname;
+    insert_values = [author_id, post_title, file_name, post_summary];
+    dbConn.getConnection(function(err, connection){
+        if (err) {
+            throw err;
+        }
+        let query = "insert into posts(user_id, post_title, post_content, post_summary) values (?)";
+
+        connection.query(query, [insert_values], function(err, result){
+            if (err) {
+                throw err;
+            }
+            res.status(200).json({message: "posted successfully"});
+            connection.release();
+        });
+    });
+  });
 
 // set port
 app.listen(8000, function () {

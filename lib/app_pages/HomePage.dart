@@ -3,11 +3,15 @@ import 'ListThePostsPage.dart';
 import './Search_button.dart';
 
 class Home_page extends StatefulWidget {
+  final int authorisedUser;
+  Home_page({super.key, required this.authorisedUser});
   @override
-  State<Home_page> createState() => _Home_pageState();
+  State<Home_page> createState() => _Home_pageState(this.authorisedUser);
 }
 
 class _Home_pageState extends State<Home_page> {
+  final int authorisedUser;
+  _Home_pageState(this.authorisedUser);
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -28,7 +32,9 @@ class _Home_pageState extends State<Home_page> {
                   Search_here(),
                 ],
               ),
-              body: const ListThePosts(),
+              body: ListThePosts(
+                authorisedUser: authorisedUser,
+              ),
             ),
           ],
         ),

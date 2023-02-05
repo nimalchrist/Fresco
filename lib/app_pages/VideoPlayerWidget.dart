@@ -30,7 +30,6 @@ class _PostVideoPlayerState extends State<PostVideoPlayer> {
 
   @override
   void dispose() {
-    // TODO: implement dispose
     controller!.dispose();
     super.dispose();
   }
@@ -54,10 +53,14 @@ class _PostVideoPlayerState extends State<PostVideoPlayer> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          child: DropdownButton(
+                    Container(
+                      margin: const EdgeInsets.only(
+                        bottom: 25,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          DropdownButton(
                             alignment: Alignment.bottomCenter,
                             dropdownColor: Colors.black,
                             iconSize: 30,
@@ -82,21 +85,13 @@ class _PostVideoPlayerState extends State<PostVideoPlayer> {
                               });
                             },
                           ),
-                        ),
-                        const SizedBox(
-                          width: 20,
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.only(
-                            left: 5,
-                            right: 16,
-                            bottom: 16,
+                          const SizedBox(
+                            width: 15,
                           ),
-                          child: IconButton(
+                          IconButton(
                             icon: Icon(
                               color: Colors.white,
-                              size: 40,
+                              size: 38,
                               controller!.value.isPlaying
                                   ? Icons.pause
                                   : Icons.play_arrow,
@@ -109,19 +104,12 @@ class _PostVideoPlayerState extends State<PostVideoPlayer> {
                               });
                             },
                           ),
-                        ),
-                        const SizedBox(
-                          width: 30,
-                        ),
-                        Container(
-                          padding: const EdgeInsets.only(
-                            left: 5,
-                            right: 16,
-                            bottom: 16,
+                          const SizedBox(
+                            width: 30,
                           ),
-                          child: IconButton(
+                          IconButton(
                             icon: Icon(
-                              size: 37,
+                              size: 30,
                               color: Colors.white,
                               controller!.value.volume == 0
                                   ? Icons.volume_off
@@ -135,8 +123,8 @@ class _PostVideoPlayerState extends State<PostVideoPlayer> {
                               });
                             },
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ],
                 ),

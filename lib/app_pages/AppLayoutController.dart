@@ -74,7 +74,9 @@ class _AppLayoutState extends State<AppLayout> {
               });
             },
             children: [
-              Home_page(),
+              Home_page(
+                authorisedUser: authorisedUser,
+              ),
               const NotificationPage(),
               const NotificationPage(),
               Our_profile_page(
@@ -121,7 +123,7 @@ class _AppLayoutState extends State<AppLayout> {
           type: BottomNavigationBarType.fixed,
           showSelectedLabels: false,
           showUnselectedLabels: false,
-          selectedItemColor: Color.fromARGB(255, 41, 27, 121),
+          selectedItemColor: const Color.fromARGB(255, 41, 27, 121),
           unselectedItemColor: const Color.fromARGB(255, 158, 158, 158),
           elevation: 0,
           backgroundColor: Theme.of(context).primaryColor.withAlpha(0),

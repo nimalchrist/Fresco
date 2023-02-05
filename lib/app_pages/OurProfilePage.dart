@@ -17,7 +17,6 @@ class _Our_profile_pageState extends State<Our_profile_page> {
   Httpservice httpService = Httpservice();
   @override
   Widget build(BuildContext context) {
-    print(authorisedUser);
     return Scaffold(
       appBar: buildAppBar(context),
       body: FutureBuilder(
@@ -26,7 +25,7 @@ class _Our_profile_pageState extends State<Our_profile_page> {
             AsyncSnapshot<AuthorisedUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.112.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.164.221:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
@@ -85,7 +84,10 @@ class _Our_profile_pageState extends State<Our_profile_page> {
           children: [
             const Text(
               'About',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 16),
             Text(
@@ -133,18 +135,18 @@ Widget buildBottomSheet(BuildContext context) {
         onTap: () {},
       ),
       ListTile(
-        leading: const Icon(Icons.notifications_off),
-        title: const Text('Turn off notification'),
+        leading: const Icon(Icons.person),
+        title: const Text('Edit profile'),
         onTap: () {},
       ),
       ListTile(
-        leading: const Icon(Icons.block),
-        title: const Text('Block list '),
+        leading: const Icon(Icons.notifications),
+        title: const Text('Notification settings'),
         onTap: () {},
       ),
       ListTile(
         leading: const Icon(Icons.logout),
-        title: const Text('Log out '),
+        title: const Text('Log out'),
         onTap: () {},
       ),
     ],
@@ -200,7 +202,7 @@ class ProfileWidget extends StatelessWidget {
         color: Colors.white,
         all: 3,
         child: buildCircle(
-          color: Color.fromARGB(230, 31, 21, 87),
+          color: const Color.fromARGB(230, 31, 21, 87),
           all: 8,
           child: const Icon(
             Icons.edit,

@@ -35,12 +35,12 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 
-
-const storage = multer.diskStorage({
+// disk storage for post
+const postStorage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, __dirname + '/post_contents');
     },
-    fileFilter(req, file, cb) {
+    fileFilter(file, cb) {
         // Allowed file types
         const allowedFileTypes = /\.(jpg|jpeg|png|mp4|mp3|txt)$/;
         if (!file.originalname.match(allowedFileTypes)) {
@@ -55,8 +55,29 @@ const storage = multer.diskStorage({
         cb(null, file.originalname);
     },
 });
-const upload_file = multer({ storage });
+const upload_file = multer({ storage: postStorage });
 
+// disk storage for profile
+const profileStorage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, __dirname + '/profile_pics');
+    },
+    fileFilter(file, cb){
+        const allowedFileTypes = /\.(jpg|jpeg|png)$/;
+        if (!file.originalname.match(allowedFileTypes)) {
+            return cb(new Error('Please upload a valid file type'));
+        }
+        cb(undefined, true);
+    },
+    limits: {
+        fileSize: 1000000
+    },
+    filename: (req, file, cb) => {
+        cb(null, file.originalname);
+    },
+});
+const upload_profile = multer({ storage: profileStorage });
+ 
 
 //static accessing of images and videos
 app.use(express.static('public'));
@@ -93,7 +114,7 @@ app.get('/posts', function(req, res){
         if (err) {
             res.status(400).json({body: "Error with fetching...try again later..."});
         } else {
-            connection.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id;', function(error, results, fields){
+            connection.query('select  posts.post_id, users.user_id, users.user_name, users.profile_pic, posts.post_title, posts.post_content, posts.post_summary, posts.time_posted from posts inner join users on posts.user_id = users.user_id ORDER BY posts.time_posted DESC;', function(error, results, fields){
                 if(error) {
                     res.status(400).json({body: "Error with fetching...try again later..."});
                 } else {
@@ -142,6 +163,54 @@ app.get('/auth_user/:id', function(req, res){
         });
     });
 });
+
+//edit the authenticated user --> profile
+app.post('/edit_profile/:user_id', upload_profile.single('profilePic'), function(req, res){
+    userId = req.params.user_id;
+
+    profilePic = req.file;
+    fileName = profilePic.originalname;
+    userName = req.body.userName;
+    profileText = req.body.profileSummary;
+    values = [fileName, userName, profileText, userId];
+    dbConn.getConnection(function(err, connection){
+        if (err) {
+            res.status(500).send({message: "Update failed try again later"});
+        }
+        connection.query('update users set profile_pic = ?, user_name = ?, profile_text = ? where user_id = ?', values, function(err){
+            if (err) {
+                return res.status(500).send({message: "Failed to update try again later"});
+            }
+            res.status(200).json({message: "Updated successfully"});
+            connection.release();
+        });
+    });
+});
+// app.post('/edit_profile/:user_id', profile_file.single('updatedProfilePic'), function(req, res){
+//     user_id = req.params.user_id;
+
+//     profile_pic_file = req.file;
+//     profile_pic = profile_pic_file.originalname;
+
+//     user_name = req.body.userName;
+//     profile_text = req.body.profileText;
+//     values = [profile_pic, user_name, profile_text, user_id];
+
+//     dbConn.getConnection(function(err, connection){
+//         if (err) {
+//             res.status(500).send({message: "Update failed try again later"});
+//         }
+//         connection.query('update users set profile_pic = ?, user_name = ?, profile_text = ? where user_id = ?', values, function(err){
+//             if (err) {
+//                 console.log(err);
+//                 return res.status(500).send({message: "Failed to update try again later"});
+//             }
+//             res.status(200).json({message: "Updated successfully"});
+//         });
+//     });
+// });
+
+//edit the authenticated user --> account
 
 //Create user API
 app.post('/register', function(req, res){
@@ -336,7 +405,6 @@ app.post('/:user_id/upload_post', upload_file.single('uploadedFile'), async (req
             if (err) {
                 throw err;
             }
-            console.log(result);
             res.status(200).json({message: "posted successfully"});
             connection.release();
         });
