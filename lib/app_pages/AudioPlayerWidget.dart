@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class PostAudioPlayer extends StatefulWidget {
   final String audioURL;
@@ -86,8 +87,8 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
             aspectRatio: 15 / 16,
             child: Padding(
               padding: const EdgeInsets.all(68.0),
-              child: Image.network(
-                'http://192.168.164.221:8000/profile_pics/$profilePic',
+              child: CachedNetworkImage(
+                imageUrl: 'http://192.168.20.221:8000/profile_pics/$profilePic',
                 fit: BoxFit.cover,
               ),
             ),

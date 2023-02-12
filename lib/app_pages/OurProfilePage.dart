@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fresco/app_pages/EditAccountInfoPage.dart';
 import 'package:fresco/app_pages/EditProfilePage.dart';
 import 'package:fresco/app_pages/ImageViewer.dart';
+import 'package:fresco/app_pages/LoginPage.dart';
 import 'package:fresco/http_operations/authorised_user_model.dart';
 import 'package:fresco/http_operations/http_services.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Our_profile_page extends StatefulWidget {
   final int authorisedUser;
@@ -17,19 +20,34 @@ class _Our_profile_pageState extends State<Our_profile_page> {
   final int authorisedUser;
   _Our_profile_pageState(this.authorisedUser);
   Httpservice httpService = Httpservice();
+  AuthorisedUserModel? _authorisedUser;
+  bool _isRefreshing = false;
+
+  void fetchAuthorInfo() async {
+    AuthorisedUserModel authorizedUser =
+        await httpService.getAuthorisedUser(authorisedUser);
+    setState(() {
+      _authorisedUser = authorizedUser;
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAuthorInfo();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: FutureBuilder(
-          future: httpService.getAuthorisedUser(authorisedUser),
-          builder: ((BuildContext context,
-              AsyncSnapshot<AuthorisedUserModel> snapshot) {
-            if (snapshot.hasData) {
-              String _imagePath =
-                  'http://192.168.164.221:8000/profile_pics/${snapshot.data!.profilePic}';
-              return ListView(
+        child: _authorisedUser == null || _isRefreshing
+            ? const Center(
+                child: CircularProgressIndicator(
+                  color: Color.fromARGB(255, 31, 21, 87),
+                ),
+              )
+            : ListView(
                 physics: const BouncingScrollPhysics(),
                 children: [
                   Row(
@@ -47,7 +65,9 @@ class _Our_profile_pageState extends State<Our_profile_page> {
                               context: context,
                               builder: (context) {
                                 return buildBottomSheet(
-                                    context, snapshot.data!);
+                                  context,
+                                  _authorisedUser!,
+                                );
                               },
                             );
                           },
@@ -59,44 +79,26 @@ class _Our_profile_pageState extends State<Our_profile_page> {
                     height: 38,
                   ),
                   ProfileWidget(
-                    imagePath: _imagePath,
+                    imagePath:
+                        'http://192.168.20.221:8000/profile_pics/${_authorisedUser!.profilePic}',
                     onClicked: () async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) =>
-                              ImageViewer(imageURL: _imagePath),
+                          builder: (context) => ImageViewer(
+                            imageURL:
+                                'http://192.168.20.221:8000/profile_pics/${_authorisedUser!.profilePic}',
+                          ),
                         ),
                       );
                     },
                   ),
                   const SizedBox(height: 24),
-                  buildName(snapshot.data!),
+                  buildName(_authorisedUser!),
                   const SizedBox(height: 48),
-                  buildAbout(snapshot.data!),
+                  buildAbout(_authorisedUser!),
                 ],
-              );
-            }
-            if (snapshot.hasError) {
-              return const Scaffold(
-                body: Center(
-                  child: Text(
-                    "Can't connect to the server\n right now",
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              );
-            }
-            return const Center(
-              child: CircularProgressIndicator(
-                color: Color.fromARGB(255, 31, 21, 87),
               ),
-            );
-          }),
-        ),
       ),
     );
   }
@@ -153,24 +155,41 @@ class _Our_profile_pageState extends State<Our_profile_page> {
         ListTile(
           leading: const Icon(Icons.edit),
           title: const Text('Edit account'),
-          onTap: () {},
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => EditAccountInfo(),
+              ),
+            );
+          },
         ),
         ListTile(
           leading: const Icon(Icons.person),
           title: const Text('Edit profile'),
-          onTap: () {
+          onTap: () async {
             Navigator.pop(context);
-            Navigator.push(
+            final result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => EditProfilePage(
                   profilePic:
-                      'http://192.168.164.221:8000/profile_pics/${userModel.profilePic}',
+                      'http://192.168.20.221:8000/profile_pics/${userModel.profilePic}',
                   userName: userModel.userName,
-                  userAbout: userModel.profileText!,
+                  userAbout: userModel.profileText,
+                  userId: authorisedUser,
                 ),
               ),
             );
+            if (result != null && result == true) {
+              setState(() {
+                _isRefreshing = true;
+              });
+              fetchAuthorInfo();
+              setState(() {
+                _isRefreshing = false;
+              });
+            }
           },
         ),
         ListTile(
@@ -181,7 +200,22 @@ class _Our_profile_pageState extends State<Our_profile_page> {
         ListTile(
           leading: const Icon(Icons.logout),
           title: const Text('Log out'),
-          onTap: () {},
+          onTap: () async {
+            SharedPreferences prefs = await SharedPreferences.getInstance();
+            prefs.clear();
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Log out successful"),
+                behavior: SnackBarBehavior.floating,
+              ),
+            );
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const LoginPage(),
+              ),
+            );
+          },
         ),
       ],
     );

@@ -32,7 +32,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.164.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://192.168.20.221:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [
@@ -123,8 +123,6 @@ class _Other_profile_pageState extends State<Other_profile_page> {
 }
 
 AppBar buildAppBar(BuildContext context) {
-  // const icon = CupertinoIcons.moon_stars;
-
   return AppBar(
     backgroundColor: Colors.transparent,
     elevation: 0,

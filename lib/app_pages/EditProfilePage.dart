@@ -1,49 +1,83 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:fresco/app_pages/ImageViewer.dart';
 import 'package:image_picker/image_picker.dart';
+import '../http_operations/http_services.dart';
+import 'package:http/http.dart' as http;
+import 'package:path_provider/path_provider.dart';
+import 'dart:math';
 
 class EditProfilePage extends StatefulWidget {
   final String profilePic;
   final String userName;
-  final String userAbout;
+  final String? userAbout;
+  final int userId;
 
   EditProfilePage({
     Key? key,
     required this.profilePic,
     required this.userName,
     required this.userAbout,
+    required this.userId,
   });
 
   @override
-  _EditProfilePageState createState() =>
-      _EditProfilePageState(this.profilePic, this.userName, this.userAbout);
+  // ignore: no_logic_in_create_state, library_private_types_in_public_api
+  _EditProfilePageState createState() => _EditProfilePageState(
+        profilePic,
+        userName,
+        userAbout,
+        userId,
+      );
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
   final String profilePic;
   final String userName;
-  final String userAbout;
-  _EditProfilePageState(this.profilePic, this.userName, this.userAbout);
+  final String? userAbout;
+  final int userId;
+  File? profileImageFile;
+  Httpservice httpService = Httpservice();
 
-  late TextEditingController name_controller;
-  late TextEditingController about_controller;
+  _EditProfilePageState(
+    this.profilePic,
+    this.userName,
+    this.userAbout,
+    this.userId,
+  );
+
+  late TextEditingController nameController;
+  late TextEditingController aboutController;
   GlobalKey _formKey = GlobalKey<FormState>();
-  File? updatedProfile;
+
+  File? updatedProfile = null;
 
   @override
   void initState() {
     super.initState();
-    name_controller = TextEditingController(text: userName);
-    about_controller = TextEditingController(text: userAbout);
+    nameController = TextEditingController(text: userName);
+    if (userAbout == null) {
+      aboutController = TextEditingController(text: "");
+    } else {
+      aboutController = TextEditingController(text: userAbout);
+    }
   }
 
-  void getProfilePic(ImageSource source) async {
-    final profile = await ImagePicker().pickImage(source: source);
-    File profileTemp = File(profile!.path);
+  void fetchProfilePic(ImageSource source) async {
+    final pickedProfilePic = await ImagePicker().pickImage(source: source);
+    File profileTempPath = File(pickedProfilePic!.path);
     setState(() {
-      updatedProfile = profileTemp;
+      updatedProfile = profileTempPath;
     });
+  }
+
+  Future<File> urlToFile(String imageUrl) async {
+    var randomFileName = Random();
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File file = File('$tempPath${randomFileName.nextInt(100)}.png');
+    http.Response response = await http.get(Uri.parse(imageUrl));
+    await file.writeAsBytes(response.bodyBytes);
+    return file;
   }
 
   @override
@@ -121,65 +155,37 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 color: const Color.fromARGB(230, 31, 21, 87),
                                 child: GestureDetector(
                                   onTap: () {
-                                    showDialog(
-                                      barrierDismissible: false,
+                                    showModalBottomSheet(
                                       context: context,
-                                      builder: (context) => AlertDialog(
-                                        content: Column(
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const SizedBox(
-                                              height: 15,
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                getProfilePic(
-                                                    ImageSource.gallery);
-                                              },
-                                              child: const Text(
-                                                "Select From Gallery",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                  color: Color.fromRGBO(
-                                                      31, 21, 87, 1),
-                                                ),
-                                              ),
-                                            ),
-                                            const SizedBox(
-                                              height: 5,
-                                            ),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                                getProfilePic(
-                                                    ImageSource.camera);
-                                              },
-                                              child: const Text(
-                                                "Select From Camera",
-                                                style: TextStyle(
-                                                  fontWeight: FontWeight.bold,
-                                                  fontSize: 20,
-                                                  color: Color.fromRGBO(
-                                                      31, 21, 87, 1),
-                                                ),
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
+                                      builder: (context) => Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: <Widget>[
+                                          const SizedBox(
+                                            height: 20,
+                                          ),
+                                          ListTile(
+                                            leading: const Icon(Icons.photo),
+                                            title: const Text(
+                                                'Choose from gallery'),
+                                            onTap: () async {
                                               Navigator.pop(context);
+                                              fetchProfilePic(
+                                                ImageSource.gallery,
+                                              );
                                             },
-                                            child: const Text(
-                                              "Cancel",
-                                              style: TextStyle(
-                                                fontSize: 20,
-                                              ),
-                                            ),
-                                          )
+                                          ),
+                                          ListTile(
+                                            leading:
+                                                const Icon(Icons.camera_alt),
+                                            title: const Text(
+                                                'Choose from camera'),
+                                            onTap: () async {
+                                              Navigator.pop(context);
+                                              fetchProfilePic(
+                                                ImageSource.camera,
+                                              );
+                                            },
+                                          ),
                                         ],
                                       ),
                                     );
@@ -199,6 +205,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ),
                 ),
                 const SizedBox(height: 24),
+                //for username and password
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -217,7 +224,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         }
                         return null;
                       },
-                      controller: name_controller,
+                      controller: nameController,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         filled: true,
@@ -228,6 +235,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   ],
                 ),
                 const SizedBox(height: 24),
+                //for about
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -240,7 +248,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                     const SizedBox(height: 8),
                     TextFormField(
-                      controller: about_controller,
+                      controller: aboutController,
                       decoration: const InputDecoration(
                         border: InputBorder.none,
                         filled: true,
@@ -253,14 +261,28 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 Padding(
                   padding: const EdgeInsets.only(top: 32.0),
                   child: TextButton(
-                    onPressed: () {
-                      print(name_controller.text);
-                      print(about_controller.text);
+                    onPressed: () async {
                       if (updatedProfile != null) {
-                        //easy implementation
+                        profileImageFile = updatedProfile;
                       } else {
-                        // convert the url to file then send the data
+                        profileImageFile = null;
                       }
+
+                      String? response = await httpService.editProfile(
+                        userId,
+                        profileImageFile,
+                        nameController.text,
+                        aboutController.text,
+                      );
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(response!),
+                          behavior: SnackBarBehavior.floating,
+                        ),
+                      );
+                      // ignore: use_build_context_synchronously
+                      Navigator.pop(context, true);
                     },
                     child: const Text('Save'),
                   ),
