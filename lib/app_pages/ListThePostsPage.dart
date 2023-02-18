@@ -101,7 +101,7 @@ class _ListThePostsState extends State<ListThePosts> {
       String userName, DateTime timePosted) {
     String postedTime = timeFormatter(timePosted);
     const double avatarDiameter = 44;
-    var userProfile = 'http://192.168.20.221:8000/profile_pics/$profilePic';
+    var userProfile = 'http://192.168.104.221:8000/profile_pics/$profilePic';
     return Row(
       children: [
         Padding(
@@ -145,7 +145,7 @@ class _ListThePostsState extends State<ListThePosts> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              '@$userName',
+              userName,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 18,
@@ -196,7 +196,7 @@ class _ListThePostsState extends State<ListThePosts> {
 
   Widget postContent(String postTitle, String postContent, String profilePic,
       String userName) {
-    String postURL = 'http://192.168.20.221:8000/post_contents/$postContent';
+    String postURL = 'http://192.168.104.221:8000/post_contents/$postContent';
 
     String fileExtension = path.extension(postURL);
     if (fileExtension == '.jpg' ||

@@ -92,14 +92,15 @@ class _Confirm_passState extends State<Confirm_pass> {
             ),
           ),
           TextButton(
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const Editing_page(),
-                    ));
-              },
-              child: const Text("continue"))
+            onPressed: () {
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const Editing_page(),
+                  ));
+            },
+            child: const Text("continue"),
+          )
         ],
       ),
     );

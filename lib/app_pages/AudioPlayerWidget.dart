@@ -88,7 +88,8 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
             child: Padding(
               padding: const EdgeInsets.all(68.0),
               child: CachedNetworkImage(
-                imageUrl: 'http://192.168.20.221:8000/profile_pics/$profilePic',
+                imageUrl:
+                    'http://192.168.104.221:8000/profile_pics/$profilePic',
                 fit: BoxFit.cover,
               ),
             ),

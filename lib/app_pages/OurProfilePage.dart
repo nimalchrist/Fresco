@@ -80,14 +80,14 @@ class _Our_profile_pageState extends State<Our_profile_page> {
                   ),
                   ProfileWidget(
                     imagePath:
-                        'http://192.168.20.221:8000/profile_pics/${_authorisedUser!.profilePic}',
+                        'http://192.168.104.221:8000/profile_pics/${_authorisedUser!.profilePic}',
                     onClicked: () async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ImageViewer(
                             imageURL:
-                                'http://192.168.20.221:8000/profile_pics/${_authorisedUser!.profilePic}',
+                                'http://192.168.104.221:8000/profile_pics/${_authorisedUser!.profilePic}',
                           ),
                         ),
                       );
@@ -174,7 +174,7 @@ class _Our_profile_pageState extends State<Our_profile_page> {
               MaterialPageRoute(
                 builder: (context) => EditProfilePage(
                   profilePic:
-                      'http://192.168.20.221:8000/profile_pics/${userModel.profilePic}',
+                      'http://192.168.104.221:8000/profile_pics/${userModel.profilePic}',
                   userName: userModel.userName,
                   userAbout: userModel.profileText,
                   userId: authorisedUser,

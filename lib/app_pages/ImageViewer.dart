@@ -16,28 +16,30 @@ class _ImageViewerState extends State<ImageViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          Container(
-            constraints: BoxConstraints.expand(
-              height: MediaQuery.of(context).size.height,
-            ),
-            child: PhotoView(
-              maxScale: 0.5,
-              imageProvider: NetworkImage(
-                imageURL,
+    return SafeArea(
+      child: Scaffold(
+        body: Stack(
+          children: [
+            Container(
+              constraints: BoxConstraints.expand(
+                height: MediaQuery.of(context).size.height,
+              ),
+              child: PhotoView(
+                maxScale: 0.5,
+                imageProvider: NetworkImage(
+                  imageURL,
+                ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            icon: const Icon(Icons.arrow_back),
-            color: Colors.white,
-          ),
-        ],
+            IconButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              icon: const Icon(Icons.arrow_back),
+              color: Colors.white,
+            ),
+          ],
+        ),
       ),
     );
   }

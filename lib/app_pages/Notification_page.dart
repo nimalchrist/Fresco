@@ -15,7 +15,7 @@ class NotificationPage extends StatelessWidget {
                 "Sorry under maintenance",
                 style: TextStyle(
                     color: Colors.grey,
-                    fontSize: 18,
+                    fontSize: 14,
                     fontStyle: FontStyle.normal),
               ),
             ),
