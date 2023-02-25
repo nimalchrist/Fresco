@@ -70,16 +70,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
     });
   }
 
-  Future<File> urlToFile(String imageUrl) async {
-    var randomFileName = Random();
-    Directory tempDir = await getTemporaryDirectory();
-    String tempPath = tempDir.path;
-    File file = File('$tempPath${randomFileName.nextInt(100)}.png');
-    http.Response response = await http.get(Uri.parse(imageUrl));
-    await file.writeAsBytes(response.bodyBytes);
-    return file;
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -184,6 +174,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                               fetchProfilePic(
                                                 ImageSource.camera,
                                               );
+                                            },
+                                          ),
+                                          ListTile(
+                                            leading: const Icon(Icons.delete),
+                                            title: const Text(
+                                                'Delete profile picture'),
+                                            onTap: () async {
+                                              Navigator.pop(context);
                                             },
                                           ),
                                         ],
