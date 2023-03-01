@@ -27,6 +27,7 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
   final String audioURL;
   final String profilePic;
   final String userName;
+  final String ip = "192.168.219.221";
 
   _PostAudioPlayerState(this.audioURL, this.profilePic, this.userName);
 
@@ -88,8 +89,7 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
             child: Padding(
               padding: const EdgeInsets.all(68.0),
               child: CachedNetworkImage(
-                imageUrl:
-                    'http://192.168.104.221:8000/profile_pics/$profilePic',
+                imageUrl: 'http://$ip:8000/profile_pics/$profilePic',
                 fit: BoxFit.cover,
               ),
             ),
@@ -134,18 +134,19 @@ class _PostAudioPlayerState extends State<PostAudioPlayer> {
           CircleAvatar(
             radius: 25,
             child: IconButton(
-                iconSize: 30,
-                onPressed: () async {
-                  if (isPlaying) {
-                    await audioPlayer.pause();
-                  } else {
-                    await audioPlayer.resume();
-                    // await audioPlayer.setSourceUrl(audioURL);
-                  }
-                },
-                icon: isPlaying
-                    ? const Icon(Icons.pause)
-                    : const Icon(Icons.play_arrow)),
+              iconSize: 30,
+              onPressed: () async {
+                if (isPlaying) {
+                  await audioPlayer.pause();
+                } else {
+                  await audioPlayer.resume();
+                  // await audioPlayer.setSourceUrl(audioURL);
+                }
+              },
+              icon: isPlaying
+                  ? const Icon(Icons.pause)
+                  : const Icon(Icons.play_arrow),
+            ),
           ),
           const SizedBox(
             height: 40,

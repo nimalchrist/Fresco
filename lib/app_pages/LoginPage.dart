@@ -61,6 +61,7 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
                           Center(
                             child: Container(
+                              padding: EdgeInsets.all(8),
                               decoration: const BoxDecoration(
                                 boxShadow: [
                                   BoxShadow(
@@ -75,8 +76,8 @@ class _LoginPageState extends State<LoginPage> {
                                 ],
                               ),
                               child: const Image(
-                                height: 130,
-                                width: 130,
+                                height: 80,
+                                width: 80,
                                 image: AssetImage(
                                   'assets/images/logo.png',
                                 ),

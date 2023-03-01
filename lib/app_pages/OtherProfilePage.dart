@@ -6,6 +6,7 @@ import './ImageViewer.dart';
 
 class Other_profile_page extends StatefulWidget {
   final int user_id;
+
   const Other_profile_page({Key? key, required this.user_id}) : super(key: key);
 
   @override
@@ -15,6 +16,7 @@ class Other_profile_page extends StatefulWidget {
 
 class _Other_profile_pageState extends State<Other_profile_page> {
   final int user_id;
+  final String ip = "192.168.219.221";
   Httpservice httpservice = Httpservice();
   _Other_profile_pageState({required this.user_id});
 
@@ -32,7 +34,7 @@ class _Other_profile_pageState extends State<Other_profile_page> {
             ((BuildContext context, AsyncSnapshot<OtherUserModel> snapshot) {
           if (snapshot.hasData) {
             String imagePath =
-                'http://192.168.104.221:8000/profile_pics/${snapshot.data!.profilePic}';
+                'http://$ip:8000/profile_pics/${snapshot.data!.profilePic}';
             return ListView(
               physics: const BouncingScrollPhysics(),
               children: [

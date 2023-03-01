@@ -18,6 +18,7 @@ class Our_profile_page extends StatefulWidget {
 
 class _Our_profile_pageState extends State<Our_profile_page> {
   final int authorisedUser;
+  final String ip = "192.168.219.221";
   _Our_profile_pageState(this.authorisedUser);
   Httpservice httpService = Httpservice();
   AuthorisedUserModel? _authorisedUser;
@@ -80,14 +81,14 @@ class _Our_profile_pageState extends State<Our_profile_page> {
                   ),
                   ProfileWidget(
                     imagePath:
-                        'http://192.168.104.221:8000/profile_pics/${_authorisedUser!.profilePic}',
+                        'http://$ip:8000/profile_pics/${_authorisedUser!.profilePic}',
                     onClicked: () async {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => ImageViewer(
                             imageURL:
-                                'http://192.168.104.221:8000/profile_pics/${_authorisedUser!.profilePic}',
+                                'http://$ip:8000/profile_pics/${_authorisedUser!.profilePic}',
                           ),
                         ),
                       );
@@ -174,7 +175,7 @@ class _Our_profile_pageState extends State<Our_profile_page> {
               MaterialPageRoute(
                 builder: (context) => EditProfilePage(
                   profilePic:
-                      'http://192.168.104.221:8000/profile_pics/${userModel.profilePic}',
+                      'http://$ip:8000/profile_pics/${userModel.profilePic}',
                   userName: userModel.userName,
                   userAbout: userModel.profileText,
                   userId: authorisedUser,
