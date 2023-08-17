@@ -25,8 +25,11 @@ class _ListThePostsState extends State<ListThePosts> {
   _ListThePostsState(this.authorisedUser);
 
   String timeFormatter(DateTime dateTime) {
-    return DateFormat('MMM d, y h:mm a')
-        .format(dateTime.add(const Duration(hours: 5, minutes: 30)));
+    return DateFormat('MMM d, y h:mm a').format(
+      dateTime.add(
+        const Duration(hours: 5, minutes: 30),
+      ),
+    );
   }
 
   Httpservice httpService = Httpservice();
@@ -34,8 +37,7 @@ class _ListThePostsState extends State<ListThePosts> {
   Widget postListView(BuildContext context) {
     return FutureBuilder(
       future: httpService.getPosts(),
-      builder:
-          (BuildContext context, AsyncSnapshot<List<PostListModel>> snapshot) {
+      builder: (BuildContext context, AsyncSnapshot<List<PostListModel>> snapshot) {
         if (snapshot.hasData) {
           return GestureDetector(
             onDoubleTap: () {
@@ -98,8 +100,8 @@ class _ListThePostsState extends State<ListThePosts> {
     );
   }
 
-  Widget authorInfo(BuildContext context, int userId, String profilePic,
-      String userName, DateTime timePosted) {
+  Widget authorInfo(
+      BuildContext context, int userId, String profilePic, String userName, DateTime timePosted) {
     String postedTime = timeFormatter(timePosted);
     const double avatarDiameter = 44;
     var userProfile = 'http://$ip:8000/profile_pics/$profilePic';
@@ -195,14 +197,11 @@ class _ListThePostsState extends State<ListThePosts> {
     );
   }
 
-  Widget postContent(String postTitle, String postContent, String profilePic,
-      String userName) {
+  Widget postContent(String postTitle, String postContent, String profilePic, String userName) {
     String postURL = 'http://$ip:8000/post_contents/$postContent';
 
     String fileExtension = path.extension(postURL);
-    if (fileExtension == '.jpg' ||
-        fileExtension == '.jpeg' ||
-        fileExtension == '.png') {
+    if (fileExtension == '.jpg' || fileExtension == '.jpeg' || fileExtension == '.png') {
       // It's an image
       return Column(
         children: [
